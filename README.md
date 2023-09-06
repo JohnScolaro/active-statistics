@@ -1,12 +1,14 @@
 ## Active Statistics
 
+![image](https://github.com/JohnScolaro/active-statistics/assets/10776898/c17e947d-d2e2-4a47-9d4b-967e956df1d1)
+
 Strava is a fantastic website, and shows a small number of highly polished visualisations. I often have ideas for plots I'd like to see that Strava doesn't show + I don't think should be too hard to produce. Luckily, Strava has an absolutely fabulous API to fetch user data from. I had an idea to create an open source website where anyone can contribute whatever visualisations they want, and hopefully we can accumulate a collection of cool visualisations.
 
 ## Webserver Setup
 
 Do you want to run this site locally to help develop/fix bugs/make new charts? Here is how to do it:
 
-* These steps may need modification for OSX/Linux, but I'm using WSL2 on Windows for development.
+* These steps may need modification for OSX/Linux, but I'm using WSL2 on Windows for development. You can't run on Windows alone because I use redis for data storage and task queues, and redis doesn't run on Windows (unless in WSL).
 
 1. In WSL, update apt with `sudo apt-get update && sudo apt-get upgrade`
 2. Install redis: `sudo apt-get install redis`
