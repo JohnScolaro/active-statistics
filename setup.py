@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 requires = [
     "Flask==2.3.3",
     "boto3==1.28.40",
-    "stravalib~=1.3.3",
+    "stravalib~=1.5.0",
     "sentry-sdk==1.30.0",
     "rq==1.15.1",
     "plotly==5.16.1",
