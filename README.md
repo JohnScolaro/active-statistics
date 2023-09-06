@@ -8,7 +8,7 @@ Strava is a fantastic website, and shows a small number of highly polished visua
 
 Do you want to run this site locally to help develop/fix bugs/make new charts? Here is how to do it:
 
-* These steps may need modification for OSX/Linux, but I'm using WSL2 on Windows for development.
+* These steps may need modification for OSX/Linux, but I'm using WSL2 on Windows for development. You can't run on Windows alone because I use redis for data storage and task queues, and redis doesn't run on Windows (unless in WSL).
 
 1. In WSL, update apt with `sudo apt-get update && sudo apt-get upgrade`
 2. Install redis: `sudo apt-get install redis`
