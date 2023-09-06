@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loading_styles.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <title>Home Page</title>
+</head>
+
+<body>
+    <div class="home-page">
+        <div class="top-bar-container">
+            <div class="top-bar">
+                <div class="top-bar-title">
+                    <a href="{{ url_for('index') }}" class="no-decoration">Active Statistics</a>
+                </div>
+                <div class="spacer"></div>
+            </div>
+        </div>
+        <div class="content-container">
+            <div class="main-content-container">
+                <div class="regular-text-component regular-font">
+                    I made this site because I want to visualise my Strava activities in more ways than
+                    Strava currently allows. I figured it would be a good learning experience to make
+                    a website showing these statistics, and make it available to the public for free (so long as it
+                    doesn't become provibitively expensive to host).<br><br>
+                    Here is an example plot to give you an idea of some of the cool visualisations that await!
+                </div>
+                <div id="example-chart" class="example-chart">
+                    <div class="lds-ellipsis">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+                <div class="regular-text-component regular-font">To continue, please connect with Strava:</div>
+                <a class="connect-with-strava" href="{{ strava_auth_url }}"><img
+                        src="static/images/btn_strava_connectwith_orange.svg"></a>
+                <div class="regular-text-component regular-font">
+                    <b>Frequently asked Questions:</b><br><br>
+                    <b>Who are you?</b><br>
+                    I'm John! I wanted to visualise data that Strava stores in more ways than Strava does. I enjoy data
+                    visualisation and make websites for my day job, so this is a fun combination of things I
+                    enjoy. I intend to keep this website operational and free so long as it doesn't become prohibatively
+                    expensive to maintain!<br><br>
+                    <b>What do I do with your data?</b><br>
+                    When granted permission, I download all your Strava activity data and use it to generate a number of
+                    visualisations. Because I'm really cheap, I delete all your data after a week of not accessing it to
+                    avoid paying money to store data I realistically don't care about. Don't worry, I'm not using it for
+                    anything nefarious.<br><br>
+                    <b>I have a cool idea for something to add to your site!</b><br>
+                    Neat! That's not a question, but feel free to email me at: johnscolaro95@gmail.com<br><br>
+                </div>
+                <div class="spacer"></div>
+                <div class="powered_by_strava_div">
+                    <img src="static/images/api_logo_pwrdBy_strava_stack_gray.svg">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var chart_div = document.getElementById('example-chart')
+            const loading_div = document.querySelector('.lds-ellipsis');
+
+            // Fetch the chart data asynchronously
+            $.getJSON('/example_chart_data', function (chartData) {
+                chartData = JSON.parse(chartData);
+
+                // Remove the loading spinner div
+                loading_div.remove();
+
+                // Create the Plotly chart
+                Plotly.newPlot(chart_div, chartData.data, chartData.layout);
+            });
+        });
+    </script>
+</body>
+
+</html>

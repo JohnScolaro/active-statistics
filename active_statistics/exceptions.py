@@ -1,0 +1,2 @@
+class UserVisibleException(Exception):
+    pass

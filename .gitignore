@@ -1,0 +1,16 @@
+.venv*
+activity_cache.obj
+*.mp4
+*.gif
+!examples/*
+__pycache__
+.pytest_cache
+*output
+storage
+tmp_storage
+*/logs/*
+*.egg-info
+build
+envs/*
+!envs/example.env
+!envs/prod.sh

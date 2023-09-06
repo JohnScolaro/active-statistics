@@ -1,0 +1,129 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ActiveStatistics Server (local data)",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "console": "internalConsole",
+            "args": [
+                "run",
+            ],
+            "presentation": {
+                "hidden": true,
+            },
+            "envFile": "${workspaceFolder}/envs/dev_local.env",
+            "cwd": "${workspaceFolder}/active_statistics"
+        },
+        {
+            "name": "ActiveStatistics Server (s3 data)",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "console": "internalConsole",
+            "args": [
+                "run",
+            ],
+            "presentation": {
+                "hidden": true,
+            },
+            "envFile": "${workspaceFolder}/envs/dev_s3.env",
+            "cwd": "${workspaceFolder}/active_statistics"
+        },
+        {
+            "name": "RQ Summary Worker (s3 data)",
+            "request": "launch",
+            "type": "python",
+            "program": "${workspaceFolder}/.venv/bin/rq",
+            "args": [
+                "worker",
+                "summary_queue",
+                "--url",
+                "redis://localhost/1",
+                "--config",
+                "active_statistics.rq_settings"
+            ],
+            "console": "internalConsole",
+            "envFile": "${workspaceFolder}/envs/dev_s3.env",
+            "presentation": {
+                "hidden": true,
+            },
+        },
+        {
+            "name": "RQ Detailed Worker (s3 data)",
+            "request": "launch",
+            "type": "python",
+            "program": "${workspaceFolder}/.venv/bin/rq",
+            "args": [
+                "worker",
+                "detailed_queue",
+                "--url",
+                "redis://localhost/1",
+                "--config",
+                "active_statistics.rq_settings"
+            ],
+            "console": "internalConsole",
+            "envFile": "${workspaceFolder}/envs/dev_s3.env",
+            "presentation": {
+                "hidden": true,
+            },
+        },
+        {
+            "name": "RQ Summary Worker (local data)",
+            "request": "launch",
+            "type": "python",
+            "program": "${workspaceFolder}/.venv/bin/rq",
+            "args": [
+                "worker",
+                "summary_queue",
+                "--url",
+                "redis://localhost/1",
+                "--config",
+                "active_statistics.rq_settings"
+            ],
+            "console": "internalConsole",
+            "envFile": "${workspaceFolder}/envs/dev_local.env",
+            "presentation": {
+                "hidden": true,
+            },
+        },
+        {
+            "name": "RQ Detailed Worker (local data)",
+            "request": "launch",
+            "type": "python",
+            "program": "${workspaceFolder}/.venv/bin/rq",
+            "args": [
+                "worker",
+                "detailed_queue",
+                "--url",
+                "redis://localhost/1",
+                "--config",
+                "active_statistics.rq_settings"
+            ],
+            "console": "internalConsole",
+            "envFile": "${workspaceFolder}/envs/dev_local.env",
+            "presentation": {
+                "hidden": true,
+            },
+        }
+    ],
+    "compounds": [
+        {
+            "name": "ActiveStatistics (local data)",
+            "configurations": [
+                "ActiveStatistics Server (local data)",
+                "RQ Summary Worker (local data)",
+                "RQ Detailed Worker (local data)"
+            ]
+        },
+        {
+            "name": "ActiveStatistics (s3 data)",
+            "configurations": [
+                "ActiveStatistics Server (s3 data)",
+                "RQ Summary Worker (s3 data)",
+                "RQ Detailed Worker (s3 data)"
+            ]
+        },
+    ]
+}

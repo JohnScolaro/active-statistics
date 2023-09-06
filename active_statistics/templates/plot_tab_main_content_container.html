@@ -1,0 +1,18 @@
+<div class="explanation-container">
+    {{ explanation }}
+</div>
+<div class="plot-container" id="plot-container" data-key="{{ key }}" data-url="{{ plot_endpoint }}">
+    <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+<script type="module">
+    import { tab_function } from "{{ url_for('static', filename='plot_tab_script.js') }}";
+
+    $(document).ready(function () {
+        tab_function();
+    });
+</script>
