@@ -1,5 +1,7 @@
 ## Active Statistics
 
+![image](https://github.com/JohnScolaro/active-statistics/assets/10776898/c17e947d-d2e2-4a47-9d4b-967e956df1d1)
+
 Strava is a fantastic website, and shows a small number of highly polished visualisations. I often have ideas for plots I'd like to see that Strava doesn't show + I don't think should be too hard to produce. Luckily, Strava has an absolutely fabulous API to fetch user data from. I had an idea to create an open source website where anyone can contribute whatever visualisations they want, and hopefully we can accumulate a collection of cool visualisations.
 
 ## Webserver Setup
