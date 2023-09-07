@@ -16,7 +16,7 @@ from stravalib.model import Activity, ActivityType
 
 from active_statistics.exceptions import UserVisibleException
 from active_statistics.visualisations.utils.average_speed_utils import (
-    ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING,
+    get_y_axis_settings,
 )
 
 
@@ -87,13 +87,11 @@ def plot(activity_iterator: Iterator[Activity]) -> go.Figure:
                             },
                             {
                                 "yaxis": {
-                                    "tickformat": ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING.get(
-                                        activity_type,
-                                        ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING["DEFAULT"],
+                                    "tickformat": get_y_axis_settings(
+                                        activity_type
                                     ).tick_format,
-                                    "title": ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING.get(
-                                        activity_type,
-                                        ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING["DEFAULT"],
+                                    "title": get_y_axis_settings(
+                                        activity_type
                                     ).axis_title,
                                 }
                             },
@@ -123,8 +121,8 @@ def get_data_scatters(
     data_scatters: list[tuple[ActivityType, list[CompactActivity]]] = []
 
     for i, (activity_type, activities) in enumerate(ordered_activities.items()):
-        pace_conversion_function = ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING.get(
-            activity_type, ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING["DEFAULT"]
+        pace_conversion_function = get_y_axis_settings(
+            activity_type
         ).conversion_function
         x = [activity.start_date_local for activity in activities]
         y = [
@@ -151,8 +149,8 @@ def get_moving_average_scatters(
 ) -> list[go.Figure]:
     scatters: list[go.Scatter] = []
     for i, (activity_type, activities) in enumerate(ordered_activities.items()):
-        pace_conversion_function = ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING.get(
-            activity_type, ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING["DEFAULT"]
+        pace_conversion_function = get_y_axis_settings(
+            activity_type
         ).conversion_function
         x = [activity.start_date_local for activity in activities]
         y = [activity.average_speed.m for activity in activities]
@@ -274,9 +272,9 @@ def set_initial_y_axis(fig: go.Figure) -> None:
     """
     first_activity_type = fig["data"][0]["name"]
 
-    fig["layout"]["yaxis"]["tickformat"] = ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING[
+    fig["layout"]["yaxis"]["tickformat"] = get_y_axis_settings(
         first_activity_type
-    ].tick_format
+    ).tick_format
 
 
 # For testing

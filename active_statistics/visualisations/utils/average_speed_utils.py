@@ -66,9 +66,15 @@ ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING: dict[ActivityType, AverageSpeedYAxisSetting
         tick_format="%M:%S",
         axis_title="Average Pace (mins/km)",
     ),
-    "DEFAULT": AverageSpeedYAxisSettings(
-        conversion_function=average_speed_to_kmph,
-        tick_format=None,
-        axis_title="Average Pace (kmph)",
-    ),
 }
+
+
+def get_y_axis_settings(activity_type: ActivityType) -> AverageSpeedYAxisSettings:
+    return ACTIVITY_TO_Y_AXIS_SETTINGS_MAPPING.get(
+        activity_type,
+        AverageSpeedYAxisSettings(
+            conversion_function=average_speed_to_kmph,
+            tick_format=None,
+            axis_title="Average Pace (kmph)",
+        ),
+    )
