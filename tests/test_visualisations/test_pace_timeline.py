@@ -1,7 +1,7 @@
 import pytest
 
 from active_statistics.exceptions import UserVisibleException
-from active_statistics.visualisations.pace_timeline import plot
+from active_statistics.statistics.plots.pace_timeline import plot
 
 
 def test_pace_timeline(some_basic_runs_and_rides) -> None:

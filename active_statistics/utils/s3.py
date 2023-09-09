@@ -13,7 +13,7 @@ BUCKET_NAME = "athlete-data-storage"
 s3 = boto3.client("s3")
 
 
-def get_plot_data(athlete_id: int, tab_key: str) -> Optional[str]:
+def get_visualisation_data(athlete_id: int, tab_key: str) -> Optional[str]:
     try:
         response = s3.get_object(
             Bucket=BUCKET_NAME,

@@ -1,7 +1,7 @@
 import pytest
 
 from active_statistics.exceptions import UserVisibleException
-from active_statistics.visualisations.github_style_activities import plot
+from active_statistics.statistics.plots.github_style_activities import plot
 
 
 def test_github_style_activities(some_basic_runs_and_rides) -> None:

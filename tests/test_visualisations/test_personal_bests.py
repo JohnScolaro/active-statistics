@@ -1,7 +1,7 @@
 import pytest
 
 from active_statistics.exceptions import UserVisibleException
-from active_statistics.visualisations.personal_bests import plot
+from active_statistics.statistics.plots.personal_bests import plot
 
 
 def test_personal_bests(some_runs_with_best_efforts) -> None:

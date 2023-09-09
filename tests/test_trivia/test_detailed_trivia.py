@@ -1,4 +1,6 @@
-from active_statistics.trivia.detailed_trivia import detailed_trivia_processor
+from active_statistics.statistics.trivia.detailed_trivia import (
+    detailed_trivia_processor,
+)
 
 
 def test_summary_trivia(some_runs_with_segment_efforts) -> None:
