@@ -81,8 +81,8 @@ def chart_data() -> Response:
 @app.route("/authenticate")
 def authenticate() -> Response:
     # Retrieve query parameters
-    code = request.args.get("code")
-    scope = request.args.get("scope")
+    code: str = request.args["code"]
+    scope: str = request.args["scope"]
 
     # Do some terrible scope checking.
     # If we aren't given permission to read activities, just return to index.

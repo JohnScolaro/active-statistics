@@ -1,11 +1,8 @@
 .venv*
-activity_cache.obj
-*.mp4
-*.gif
 !examples/*
 __pycache__
 .pytest_cache
-*output
+.mypy_cache
 storage
 tmp_storage
 */logs/*
