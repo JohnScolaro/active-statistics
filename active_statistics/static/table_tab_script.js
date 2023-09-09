@@ -29,40 +29,41 @@ function table_function(response) {
             loading_div.remove();
         }
 
-    }
+        // Generate the table from the data
+        let show_headings = response.chart_json.show_headings
+        let table_data = response.chart_json.table_data
+        let heading_order = response.chart_json.heading_order
 
-    let show_headings = response.chart_json.show_headings
-    let table_data = response.chart_json.table_data
-    let heading_order = response.chart_json.heading_order
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
 
-    const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    const tbody = document.createElement("tbody");
-
-    if (show_headings) {
-        const headingRow = document.createElement("tr");
-        for (const column of heading_order) {
-            const th = document.createElement("th");
-            th.textContent = column;
-            headingRow.appendChild(th);
+        if (show_headings) {
+            const headingRow = document.createElement("tr");
+            for (const column of heading_order) {
+                const th = document.createElement("th");
+                th.textContent = column;
+                headingRow.appendChild(th);
+            }
+            thead.appendChild(headingRow);
         }
-        thead.appendChild(headingRow);
-    }
-    // Create data rows
-    const numRows = Object.values(table_data)[0].length;
-    for (let i = 0; i < numRows; i++) {
-        const row = document.createElement("tr");
-        for (const column of heading_order) {
-            const td = document.createElement("td");
-            td.innerHTML = table_data[column][i];
-            row.appendChild(td);
+        // Create data rows
+        const numRows = Object.values(table_data)[0].length;
+        for (let i = 0; i < numRows; i++) {
+            const row = document.createElement("tr");
+            for (const column of heading_order) {
+                const td = document.createElement("td");
+                td.innerHTML = table_data[column][i];
+                row.appendChild(td);
+            }
+            tbody.appendChild(row);
         }
-        tbody.appendChild(row);
-    }
 
-    table.appendChild(thead);
-    table.appendChild(tbody);
-    table_container.appendChild(table);
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        table_container.appendChild(table);
+
+    }
 }
 
 function error_handler(error) {
