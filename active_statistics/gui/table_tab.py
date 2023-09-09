@@ -1,6 +1,7 @@
 import json
 from typing import Any, Callable, Iterator, Optional
 
+import pandas as pd
 from flask import (
     Flask,
     jsonify,
@@ -20,7 +21,6 @@ from active_statistics.utils.local_storage import (
     get_summary_activity_iterator,
 )
 from active_statistics.utils.s3 import get_visualisation_data
-import pandas as pd
 
 
 class TableTab(Tab):
@@ -85,14 +85,14 @@ class TableTab(Tab):
                 athlete_id = int(session["athlete_id"])
 
                 if evm.use_s3():
-                    trivia_data_str = get_visualisation_data(athlete_id, tab.get_key())
+                    table_data_str = get_visualisation_data(athlete_id, tab.get_key())
 
                     # If there is no data in S3 for this key, return a blank figure.
-                    trivia_data: list[tuple[str, str, Optional[str]]]
-                    if trivia_data_str is None:
-                        trivia_data = []
+                    table_data: dict[Any, Any]
+                    if table_data_str is None:
+                        table_data = {}
                     else:
-                        trivia_data = json.loads(trivia_data_str)
+                        table_data = json.loads(table_data_str)
                 else:
                     activity_iterator: Iterator[Activity]
                     if tab.is_detailed():
@@ -100,10 +100,10 @@ class TableTab(Tab):
                     else:
                         activity_iterator = get_summary_activity_iterator(athlete_id)
 
-                    trivia_data = self.get_table_data(activity_iterator)
+                    table_data = self.get_table_data(activity_iterator)
 
                 # Add the key to the response so that the frontend knows which tab the data is for.
-                response_json = {"key": tab.get_key(), "chart_json": trivia_data}
+                response_json = {"key": tab.get_key(), "chart_json": table_data}
 
                 return make_response(jsonify(response_json))
 

@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Iterator, Optional
-from active_statistics.statistics.utils.strava_links import (
-    get_activity_url,
-    get_segment_url,
-    get_html_link,
-)
 
 from stravalib.model import Activity
+
+from active_statistics.statistics.utils.strava_links import (
+    get_activity_url,
+    get_html_link,
+    get_segment_url,
+)
 
 
 class TriviaTidbitBase(ABC):
@@ -74,7 +75,7 @@ class TriviaTidbitBase(ABC):
         if activity_id is not None:
             return get_html_link(get_activity_url(activity_id))
         elif segment_id is not None:
-            return get_html_link(get_segment_url(activity_id))
+            return get_html_link(get_segment_url(segment_id))
         else:
             return None
 

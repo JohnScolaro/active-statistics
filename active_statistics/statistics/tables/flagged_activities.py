@@ -1,12 +1,15 @@
+from typing import Iterator
+
 import pandas as pd
 from stravalib.model import Activity
+
 from active_statistics.statistics.utils.strava_links import (
     get_activity_url,
     get_html_link,
 )
 
 
-def flagged_activities_table(activities: list[Activity]) -> pd.DataFrame:
+def flagged_activities_table(activities: Iterator[Activity]) -> pd.DataFrame:
     flagged_activities = [activity for activity in activities if activity.flagged]
 
     activity_names = [activity.name for activity in flagged_activities]
