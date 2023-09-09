@@ -1,12 +1,12 @@
 from stravalib.model import Activity
 
-from active_statistics.trivia.min_max_summary_trivia import (
+from active_statistics.statistics.trivia.min_max_summary_trivia import (
     MaxAttributeTidbit,
     MinAttributeTidbit,
     min_and_max_distance_trivia_processor,
     min_and_max_elevation_trivia_processor,
 )
-from active_statistics.trivia.trivia import TriviaProcessor
+from active_statistics.statistics.trivia.trivia import TriviaProcessor
 from tests.factories.activity_factories import ActivityFactory
 
 

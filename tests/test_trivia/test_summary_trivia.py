@@ -1,4 +1,4 @@
-from active_statistics.trivia.summary_trivia import general_trivia
+from active_statistics.statistics.trivia.summary_trivia import general_trivia
 
 
 def test_general_trivia(some_basic_runs_and_rides) -> None:

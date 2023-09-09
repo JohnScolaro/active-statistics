@@ -17,7 +17,7 @@ from stravalib.util.limiter import RateLimiter
 
 from active_statistics.gui.gui import all_tabs
 from active_statistics.gui.plot_tabs import PlotTab
-from active_statistics.gui.trivia_tabs import TriviaTab
+from active_statistics.gui.trivia_tabs import TableTab
 from active_statistics.logging import TASK, setup_task_logging
 from active_statistics.strava_custom_rate_limiters import DetailedTaskRateLimiter
 from active_statistics.utils import redis
@@ -177,8 +177,8 @@ def process_activities(athlete_id: int, detailed: bool) -> None:
                 if isinstance(tab, PlotTab):
                     fig: go.Figure = tab.plot_function(activity_iterator)
                     json_data = json.dumps(fig, cls=PlotlyJSONEncoder)
-                if isinstance(tab, TriviaTab):
-                    data = tab.trivia_processor.get_data(activity_iterator)
+                if isinstance(tab, TableTab):
+                    data = tab.get_table_data(activity_iterator)
                     json_data = json.dumps(data, cls=PlotlyJSONEncoder)
 
                 save_plot_data(athlete_id, tab.get_key(), json_data)
