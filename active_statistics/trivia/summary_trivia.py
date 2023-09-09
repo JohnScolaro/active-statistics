@@ -176,7 +176,7 @@ class LowestAverageHeartrateTidbit(TriviaTidbitBase):
         return self.activity_id
 
 
-class MostKudosedRunTidbit(TriviaTidbitBase):
+class MostKudosedActivityTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.activity_id: Optional[int] = None
         self.max_kudos: Optional[int] = None
@@ -216,8 +216,78 @@ class FirstActivityRecordedTidbit(TriviaTidbitBase):
         return self.activity_id
 
 
-general_trivia = TriviaProcessor()
+class TotalKudosRecievedTidbit(TriviaTidbitBase):
+    def __init__(self) -> None:
+        self.kudos_count: int = 0
 
+    def process_activity(self, activity: Activity) -> None:
+        if activity.kudos_count is not None:
+            self.kudos_count += activity.kudos_count
+
+    def get_tidbit(self) -> Optional[str]:
+        return f"{self.kudos_count}"
+
+    def get_description(self) -> str:
+        return "Total Kudos Recieved"
+
+
+class EarliestActivityTidbit(TriviaTidbitBase):
+    def __init__(self) -> None:
+        self.earliest_activity_id: Optional[int] = None
+        self.time_of_earliest_activity: Optional[dt.datetime] = None
+
+    def process_activity(self, activity: Activity) -> None:
+        if activity.start_date_local is not None:
+            activity_time = activity.start_date_local.time()
+            if (
+                self.time_of_earliest_activity is None
+                or activity_time <= self.time_of_earliest_activity
+            ):
+                self.earliest_activity_id = activity.id
+                self.time_of_earliest_activity = activity_time
+
+    def get_tidbit(self) -> Optional[str]:
+        if self.time_of_earliest_activity is None:
+            return None
+        else:
+            return f"{self.time_of_earliest_activity}"
+
+    def get_description(self) -> str:
+        return "Earliest Activity"
+
+    def get_activity_id(self) -> Optional[int]:
+        return self.earliest_activity_id
+
+
+class LatestActivityTidbit(TriviaTidbitBase):
+    def __init__(self) -> None:
+        self.latest_activity_id: Optional[int] = None
+        self.time_of_latest_activity: Optional[dt.time] = None
+
+    def process_activity(self, activity: Activity) -> None:
+        if activity.start_date_local is not None:
+            activity_time = activity.start_date_local.time()
+            if (
+                self.time_of_latest_activity is None
+                or activity_time >= self.time_of_latest_activity
+            ):
+                self.latest_activity_id = activity.id
+                self.time_of_latest_activity = activity_time
+
+    def get_tidbit(self) -> Optional[str]:
+        if self.time_of_latest_activity is None:
+            return None
+        else:
+            return f"{self.time_of_latest_activity}"
+
+    def get_description(self) -> str:
+        return "Latest Activity"
+
+    def get_activity_id(self) -> Optional[int]:
+        return self.latest_activity_id
+
+
+general_trivia = TriviaProcessor()
 
 general_trivia.register_tidbit(HottestActivityTidbit())
 general_trivia.register_tidbit(ColdestActivityTidbit())
@@ -226,5 +296,8 @@ general_trivia.register_tidbit(HighestHeartRateRecordedTidbit())
 general_trivia.register_tidbit(LowestHeartRateRecordedTidbit())
 general_trivia.register_tidbit(HighestAverageHeartrateTidbit())
 general_trivia.register_tidbit(LowestAverageHeartrateTidbit())
-general_trivia.register_tidbit(MostKudosedRunTidbit())
+general_trivia.register_tidbit(MostKudosedActivityTidbit())
 general_trivia.register_tidbit(FirstActivityRecordedTidbit())
+general_trivia.register_tidbit(EarliestActivityTidbit())
+general_trivia.register_tidbit(LatestActivityTidbit())
+general_trivia.register_tidbit(TotalKudosRecievedTidbit())
