@@ -20,7 +20,10 @@ class HottestActivityTidbit(TriviaTidbitBase):
             self.hottest_temp = activity.average_temp
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.hottest_temp} Celcius"
+        if self.hottest_temp is None:
+            return None
+        else:
+            return f"{self.hottest_temp} Celcius"
 
     def get_description(self) -> str:
         return "Highest Average Temperature"
@@ -43,7 +46,10 @@ class ColdestActivityTidbit(TriviaTidbitBase):
             self.coldest_temp = activity.average_temp
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.coldest_temp} Celcius"
+        if self.coldest_temp is None:
+            return None
+        else:
+            return f"{self.coldest_temp} Celcius"
 
     def get_description(self) -> str:
         return "Lowest Average Temperature"
