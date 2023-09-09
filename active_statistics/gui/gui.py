@@ -17,6 +17,7 @@ from active_statistics.visualisations import (
     github_style_activities,
     pace_timeline,
     personal_bests,
+    histogram_of_activity_time,
 )
 
 all_tabs: list[Tab] = [
@@ -48,6 +49,12 @@ all_tabs: list[Tab] = [
         name="Pace Timeline",
         description="This plot shows the pace of your runs on a timeline. Overlaid, there is a 30 day moving average line. At any point on this line, the value is the average pace of all runs 15 days in front and behind it.",
         plot_function=pace_timeline.plot,
+        detailed=False,
+    ),
+    PlotTab(
+        name="Histogram of Activity Times",
+        description="This is a histogram of all your activity start times.",
+        plot_function=histogram_of_activity_time.plot,
         detailed=False,
     ),
     TriviaTab(
