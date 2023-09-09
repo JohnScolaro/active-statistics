@@ -1,7 +1,7 @@
 import pytest
 
 from active_statistics.exceptions import UserVisibleException
-from active_statistics.visualisations.average_heartrate_by_average_speed import plot
+from active_statistics.statistics.plots.average_heartrate_by_average_speed import plot
 
 
 def test_average_heartrate_by_average_speed_animation(

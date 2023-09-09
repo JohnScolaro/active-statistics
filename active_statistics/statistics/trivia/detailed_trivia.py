@@ -3,7 +3,7 @@ from typing import Optional
 
 from stravalib.model import Activity
 
-from active_statistics.trivia import TriviaProcessor, TriviaTidbitBase
+from active_statistics.statistics.trivia import TriviaProcessor, TriviaTidbitBase
 
 
 class TotalNumberOfSegmentsTidbit(TriviaTidbitBase):

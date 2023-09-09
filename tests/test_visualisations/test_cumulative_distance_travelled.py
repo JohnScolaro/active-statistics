@@ -1,4 +1,4 @@
-from active_statistics.visualisations.cumulative_distance_travelled import plot
+from active_statistics.statistics.plots.cumulative_distance_travelled import plot
 
 
 def test_cumulative_time_spent(some_basic_runs_and_rides) -> None:

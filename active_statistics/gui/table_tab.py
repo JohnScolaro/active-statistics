@@ -1,8 +1,6 @@
 import json
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Optional
 
-import plotly
-import plotly.graph_objects as go
 from flask import (
     Flask,
     jsonify,
@@ -22,46 +20,49 @@ from active_statistics.utils.local_storage import (
     get_summary_activity_iterator,
 )
 from active_statistics.utils.s3 import get_visualisation_data
+import pandas as pd
 
 
-class PlotTab(Tab):
+class TableTab(Tab):
     def __init__(
         self,
         name: str,
         detailed: bool,
         description: str,
-        plot_function: Callable[[Iterator[Activity]], go.Figure],
+        table_function: Optional[Callable[[Iterator[Activity]], pd.DataFrame]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(name, detailed, **kwargs)
         self.description = description
-        self.plot_function = plot_function
-
-    def get_main_content(self) -> str:
-        return render_template(
-            "plot_tab_main_content_container.html",
-            explanation=self.description,
-            plot_endpoint=self.get_plot_endpoint(),
-            key=self.get_key(),
-        )
-
-    def get_plot_endpoint(self) -> str:
-        return f"/plot/{self.get_key()}"
-
-    def get_plot_function(self) -> Callable[[Iterator[Activity]], go.Figure]:
-        return self.plot_function
+        self.table_function = table_function
 
     def generate_and_register_routes(
         self, app: Flask, evm: EnvironmentVariableManager
     ) -> None:
         self.generate_and_register_page_function(app, evm)
-        self.generate_and_register_plot_function(app, evm)
+        self.generate_and_register_data_function(app, evm)
+
+    def get_table_dataframe(self, activities: Iterator[Activity]) -> pd.DataFrame:
+        if self.table_function is None:
+            raise Exception("Table tab has no function to generate a table.")
+        return self.table_function(activities)
+
+    def has_column_headings(self):
+        return True
+
+    def get_table_data(self, activities: Iterator[Activity]) -> dict[str, Any]:
+        df = self.get_table_dataframe(activities)
+        return {
+            "table_data": df.to_dict(orient="list"),
+            "show_headings": self.has_column_headings(),
+            "heading_order": list(df.columns),
+        }
 
     def generate_and_register_page_function(
         self, app: Flask, evm: EnvironmentVariableManager
     ) -> None:
         # These functions generate the view functions we need for each route.
-        def get_page_function(tab: PlotTab) -> Callable[[], Response]:
+        def get_page_function(tab: TableTab) -> Callable[[], Response]:
             def page_function() -> Response:
                 if "athlete_id" not in session:
                     return redirect(url_for("index"))
@@ -73,49 +74,51 @@ class PlotTab(Tab):
 
         app.add_url_rule(self.get_page_endpoint(), view_func=get_page_function(self))
 
-    def generate_and_register_plot_function(
+    def generate_and_register_data_function(
         self, app: Flask, evm: EnvironmentVariableManager
     ) -> None:
-        def get_plot_function(tab: PlotTab):
-            def plot_function() -> Response:
+        def get_data_function(tab: TableTab):
+            def data_function() -> Response:
                 if "athlete_id" not in session:
                     return redirect(url_for("index"))
 
                 athlete_id = int(session["athlete_id"])
 
                 if evm.use_s3():
-                    chart_json_string = get_visualisation_data(
-                        athlete_id, tab.get_key()
-                    )
+                    trivia_data_str = get_visualisation_data(athlete_id, tab.get_key())
 
-                    # If there is no chart data in S3 for this chart, return a blank figure.
-                    if chart_json_string is None:
-                        chart_dict = {}
+                    # If there is no data in S3 for this key, return a blank figure.
+                    trivia_data: list[tuple[str, str, Optional[str]]]
+                    if trivia_data_str is None:
+                        trivia_data = []
                     else:
-                        chart_dict = json.loads(chart_json_string)
+                        trivia_data = json.loads(trivia_data_str)
                 else:
                     activity_iterator: Iterator[Activity]
                     if tab.is_detailed():
                         activity_iterator = get_activity_iterator(athlete_id)
                     else:
                         activity_iterator = get_summary_activity_iterator(athlete_id)
-                    fig: go.Figure = tab.plot_function(activity_iterator)
 
-                    # Convert the chart figure to a dictionary which can be correctly serialised by flasks `jsonify`.
-                    # We can't just rely on jsonify, because it serialised datetimes incorrectly, so we use plotlys
-                    # json encoder to make a string, then read that back into a dictionary. This serialises all the
-                    # datetimes correctly.
-                    chart_json_string = json.dumps(
-                        fig, cls=plotly.utils.PlotlyJSONEncoder
-                    )
-                    chart_dict = json.loads(chart_json_string)
+                    trivia_data = self.get_table_data(activity_iterator)
 
                 # Add the key to the response so that the frontend knows which tab the data is for.
-                response_json = {"key": tab.get_key(), "chart_json": chart_dict}
+                response_json = {"key": tab.get_key(), "chart_json": trivia_data}
 
                 return make_response(jsonify(response_json))
 
-            plot_function.__name__ = f"{tab.get_key()}_plot"
-            return plot_function
+            data_function.__name__ = f"{tab.get_key()}_data"
+            return data_function
 
-        app.add_url_rule(self.get_plot_endpoint(), view_func=get_plot_function(self))
+        app.add_url_rule(self.get_data_endpoint(), view_func=get_data_function(self))
+
+    def get_data_endpoint(self) -> str:
+        return f"/data/{self.get_key()}"
+
+    def get_main_content(self) -> str:
+        return render_template(
+            "table_tab_main_content_container.html",
+            explanation=self.description,
+            table_endpoint=self.get_data_endpoint(),
+            key=self.get_key(),
+        )

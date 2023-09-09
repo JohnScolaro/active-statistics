@@ -3,7 +3,7 @@ from typing import Optional
 import stravalib.unithelper as uh
 from stravalib.model import Activity, ActivityType
 
-from active_statistics.trivia import TriviaProcessor, TriviaTidbitBase
+from active_statistics.statistics.trivia import TriviaProcessor, TriviaTidbitBase
 
 
 class MinAttributeTidbit(TriviaTidbitBase):

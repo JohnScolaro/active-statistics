@@ -1,4 +1,4 @@
-from active_statistics.visualisations.cumulative_time_spent import plot
+from active_statistics.statistics.plots.cumulative_time_spent import plot
 
 
 def test_cumulative_gear_time(some_basic_runs_and_rides) -> None:

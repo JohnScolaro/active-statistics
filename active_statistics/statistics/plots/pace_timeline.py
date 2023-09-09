@@ -15,7 +15,7 @@ from stravalib import unithelper as uh
 from stravalib.model import Activity, ActivityType
 
 from active_statistics.exceptions import UserVisibleException
-from active_statistics.visualisations.utils.average_speed_utils import (
+from active_statistics.statistics.utils.average_speed_utils import (
     get_y_axis_settings,
 )
 

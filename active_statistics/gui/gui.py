@@ -1,15 +1,15 @@
-from typing import Type
-
 from active_statistics.gui.plot_tabs import PlotTab
 from active_statistics.gui.tabs import Tab
 from active_statistics.gui.trivia_tabs import TriviaTab
-from active_statistics.trivia.detailed_trivia import detailed_trivia_processor
-from active_statistics.trivia.min_max_summary_trivia import (
+from active_statistics.statistics.trivia.detailed_trivia import (
+    detailed_trivia_processor,
+)
+from active_statistics.statistics.trivia.min_max_summary_trivia import (
     min_and_max_distance_trivia_processor,
     min_and_max_elevation_trivia_processor,
 )
-from active_statistics.trivia.summary_trivia import general_trivia
-from active_statistics.visualisations import (
+from active_statistics.statistics.trivia.summary_trivia import general_trivia
+from active_statistics.statistics.plots import (
     average_heartrate_by_average_speed,
     cumulative_distance_travelled,
     cumulative_gear_time,
@@ -18,6 +18,10 @@ from active_statistics.visualisations import (
     pace_timeline,
     personal_bests,
     histogram_of_activity_time,
+)
+from active_statistics.gui.table_tab import TableTab
+from active_statistics.statistics.tables.flagged_activities import (
+    flagged_activities_table,
 )
 
 all_tabs: list[Tab] = [
@@ -74,6 +78,12 @@ all_tabs: list[Tab] = [
         detailed=False,
         description="Some miscellaneous trivia about your Strava activities.",
         trivia_processor=general_trivia,
+    ),
+    TableTab(
+        name="Flagged Activities",
+        detailed=False,
+        description="If any of your activity have been flagged for cheating on Strava, they will be displayed in a table below.",
+        table_function=flagged_activities_table,
     ),
     PlotTab(
         name="Personal Bests",
