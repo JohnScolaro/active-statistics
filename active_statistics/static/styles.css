@@ -409,7 +409,7 @@ body {
 }
 
 .hline {
-    height: 2px;
+    min-height: 2px;
     align-self: stretch;
 
     border-radius: 1px;
