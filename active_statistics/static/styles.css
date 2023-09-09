@@ -60,6 +60,10 @@ body {
     background: var(--green-500, #509948);
 }
 
+.top-bar img {
+    max-height: 24px;
+}
+
 .top-bar-title {
     font-family: var(--default-font-family);
     font-style: normal;
