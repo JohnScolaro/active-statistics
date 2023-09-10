@@ -314,6 +314,57 @@ class LatestActivityTidbit(TriviaTidbitBase):
         return self.latest_activity_id
 
 
+class MostConsecutiveDaysOfActivities(TriviaTidbitBase):
+    def __init__(self) -> None:
+        self.date_list: list[dt.date] = []
+
+    def process_activity(self, activity: Activity) -> None:
+        if activity.start_date_local is not None:
+            self.date_list.append(activity.start_date_local.date())
+
+    def get_tidbit(self) -> Optional[str]:
+        # Sort the date list in ascending order
+        self.date_list.sort()
+
+        max_consecutive_days = 1
+        current_consecutive_days = 1
+        start_date = self.date_list[0]
+        end_date = self.date_list[0]
+
+        # Initialize variables to track the start and end of the longest consecutive days
+        max_start_date = self.date_list[0]
+        max_end_date = self.date_list[0]
+
+        for i in range(1, len(self.date_list)):
+            # Calculate the difference between consecutive datetimes
+            time_difference = self.date_list[i] - self.date_list[i - 1]
+
+            # If there are multiple activities on the same day, just continue.
+            if time_difference == dt.timedelta(days=0):
+                continue
+
+            # Check if the difference is one day
+            if time_difference == dt.timedelta(days=1):
+                current_consecutive_days += 1
+                end_date = self.date_list[i]
+            else:
+                # If the difference is not one day, reset the current count
+                current_consecutive_days = 1
+                start_date = self.date_list[i]
+                end_date = self.date_list[i]
+
+            # Update the maximum consecutive days count and dates if needed
+            if current_consecutive_days > max_consecutive_days:
+                max_consecutive_days = current_consecutive_days
+                max_start_date = start_date
+                max_end_date = end_date
+
+        return f"{max_consecutive_days} days ({max_start_date} to {max_end_date})"
+
+    def get_description(self) -> str:
+        return "Most Consecutive Days of Activities"
+
+
 general_trivia = TriviaProcessor()
 
 general_trivia.register_tidbit(HottestActivityTidbit())
@@ -328,3 +379,4 @@ general_trivia.register_tidbit(FirstActivityRecordedTidbit())
 general_trivia.register_tidbit(EarliestActivityTidbit())
 general_trivia.register_tidbit(LatestActivityTidbit())
 general_trivia.register_tidbit(TotalKudosRecievedTidbit())
+general_trivia.register_tidbit(MostConsecutiveDaysOfActivities())
