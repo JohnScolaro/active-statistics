@@ -20,10 +20,10 @@ class HottestActivityTidbit(TriviaTidbitBase):
             self.hottest_temp = activity.average_temp
 
     def get_tidbit(self) -> Optional[str]:
-        if self.hottest_temp is None:
-            return None
-        else:
+        if self.hottest_temp:
             return f"{self.hottest_temp} Celcius"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Highest Average Temperature"
@@ -46,10 +46,10 @@ class ColdestActivityTidbit(TriviaTidbitBase):
             self.coldest_temp = activity.average_temp
 
     def get_tidbit(self) -> Optional[str]:
-        if self.coldest_temp is None:
-            return None
-        else:
+        if self.coldest_temp:
             return f"{self.coldest_temp} Celcius"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Lowest Average Temperature"
@@ -69,7 +69,10 @@ class MostPeopleOnAGroupRunTidbit(TriviaTidbitBase):
             self.most_people = activity.athlete_count
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.most_people} People"
+        if self.most_people:
+            return f"{self.most_people} People"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Most People on Group Activity"
@@ -95,7 +98,10 @@ class HighestHeartRateRecordedTidbit(TriviaTidbitBase):
             self.highest_max_heartrate = activity.max_heartrate
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.highest_max_heartrate} BPM"
+        if self.highest_max_heartrate:
+            return f"{self.highest_max_heartrate} BPM"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Highest Maximum Heartrate"
@@ -121,7 +127,10 @@ class LowestHeartRateRecordedTidbit(TriviaTidbitBase):
             self.lowest_max_heartrate = activity.max_heartrate
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.lowest_max_heartrate} BPM"
+        if self.lowest_max_heartrate:
+            return f"{self.lowest_max_heartrate} BPM"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Lowest Maximum Heartrate"
@@ -147,7 +156,10 @@ class HighestAverageHeartrateTidbit(TriviaTidbitBase):
             self.highest_average_heartrate = activity.average_heartrate
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.highest_average_heartrate} BPM"
+        if self.highest_average_heartrate:
+            return f"{self.highest_average_heartrate} BPM"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Highest Average Heartrate"
@@ -173,7 +185,10 @@ class LowestAverageHeartrateTidbit(TriviaTidbitBase):
             self.lowest_average_heartrate = activity.average_heartrate
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.lowest_average_heartrate} BPM"
+        if self.lowest_average_heartrate:
+            return f"{self.lowest_average_heartrate} BPM"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Lowest Average Heartrate"
@@ -193,7 +208,10 @@ class MostKudosedActivityTidbit(TriviaTidbitBase):
             self.max_kudos = activity.kudos_count
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.max_kudos}"
+        if self.max_kudos:
+            return f"{self.max_kudos}"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Most Kudosed Activity"
@@ -213,7 +231,10 @@ class FirstActivityRecordedTidbit(TriviaTidbitBase):
             self.activity_date = activity.start_date_local
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.activity_date}"
+        if self.activity_date:
+            return f"{self.activity_date}"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "First Activity"
@@ -253,10 +274,10 @@ class EarliestActivityTidbit(TriviaTidbitBase):
                 self.time_of_earliest_activity = activity_time
 
     def get_tidbit(self) -> Optional[str]:
-        if self.time_of_earliest_activity is None:
-            return None
-        else:
+        if self.time_of_earliest_activity:
             return f"{self.time_of_earliest_activity}"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Earliest Activity"
@@ -281,10 +302,10 @@ class LatestActivityTidbit(TriviaTidbitBase):
                 self.time_of_latest_activity = activity_time
 
     def get_tidbit(self) -> Optional[str]:
-        if self.time_of_latest_activity is None:
-            return None
-        else:
+        if self.time_of_latest_activity:
             return f"{self.time_of_latest_activity}"
+        else:
+            return None
 
     def get_description(self) -> str:
         return "Latest Activity"
