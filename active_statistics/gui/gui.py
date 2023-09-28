@@ -5,6 +5,7 @@ from active_statistics.gui.trivia_tabs import TriviaTab
 from active_statistics.statistics.plots import (
     average_heartrate_by_average_speed,
     cumulative_distance_travelled,
+    cumulative_gear_distance,
     cumulative_gear_time,
     cumulative_time_spent,
     github_style_activities,
@@ -93,8 +94,14 @@ all_tabs: list[Tab] = [
     ),
     PlotTab(
         name="Cumulative Gear Time",
-        description="A cumulative plot of the total distance you've travelled from the activities that you've logged on Strava.",
+        description="A cumulative plot of the time logged with Strava using different gear.",
         plot_function=cumulative_gear_time.plot,
+        detailed=True,
+    ),
+    PlotTab(
+        name="Cumulative Gear Distance",
+        description="A cumuative plot of the distance travelled while using different gear that you've logged on Strava.",
+        plot_function=cumulative_gear_distance.plot,
         detailed=True,
     ),
     TriviaTab(
