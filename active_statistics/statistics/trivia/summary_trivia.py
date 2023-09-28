@@ -21,7 +21,7 @@ class HottestActivityTidbit(TriviaTidbitBase):
 
     def get_tidbit(self) -> Optional[str]:
         if self.hottest_temp:
-            return f"{self.hottest_temp} Celcius"
+            return f"{self.hottest_temp} Celsius"
         else:
             return None
 
@@ -47,7 +47,7 @@ class ColdestActivityTidbit(TriviaTidbitBase):
 
     def get_tidbit(self) -> Optional[str]:
         if self.coldest_temp:
-            return f"{self.coldest_temp} Celcius"
+            return f"{self.coldest_temp} Celsius"
         else:
             return None
 
