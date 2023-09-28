@@ -99,7 +99,7 @@ def plot_graph(
                 for i in range(len(year_data))
             ),
             hovertemplate="<b>Date: %{customdata|%d %b %Y}</b><br>"
-            + "<b>Kilometers</b>: %{y:.0f}<br>",
+            + "<b>Hours</b>: %{y:.0f}<br>",
         )
 
     return dd
