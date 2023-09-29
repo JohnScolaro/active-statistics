@@ -4,11 +4,13 @@
 <head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='index_script.js') }}"></script>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='loading_styles.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
     <title>Home Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
@@ -68,23 +70,19 @@
             </div>
         </div>
     </div>
-    <script>
-        $(document).ready(function () {
-            var chart_div = document.getElementById('example-chart')
-            const loading_div = document.querySelector('.lds-ellipsis');
-
-            // Fetch the chart data asynchronously
-            $.getJSON('/example_chart_data', function (chartData) {
-                chartData = JSON.parse(chartData);
-
-                // Remove the loading spinner div
-                loading_div.remove();
-
-                // Create the Plotly chart
-                Plotly.newPlot(chart_div, chartData.data, chartData.layout);
-            });
-        });
-    </script>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h1>This is the modal title.</h1>
+            <p>This is a modal dialog. Click the "Dang" button to close it.</p>
+            <div id="close-modal-container" class="close-modal-container">
+                <div id="close-modal" class="close-modal">
+                    <div class="close-modal-text">
+                        Dang
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
