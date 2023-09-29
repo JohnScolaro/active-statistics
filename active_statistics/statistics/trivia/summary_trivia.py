@@ -323,6 +323,10 @@ class MostConsecutiveDaysOfActivities(TriviaTidbitBase):
             self.date_list.append(activity.start_date_local.date())
 
     def get_tidbit(self) -> Optional[str]:
+        # If there are no activities, just return None
+        if not self.date_list:
+            return None
+
         # Sort the date list in ascending order
         self.date_list.sort()
 
