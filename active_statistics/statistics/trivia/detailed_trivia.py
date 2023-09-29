@@ -11,7 +11,8 @@ class TotalNumberOfSegmentsTidbit(TriviaTidbitBase):
         self.segment_count = 0
 
     def process_activity(self, activity: Activity) -> None:
-        self.segment_count += len(activity.segment_efforts)
+        if activity.segment_efforts is not None:
+            self.segment_count += len(activity.segment_efforts)
 
     def get_description(self) -> str:
         return "Total Number of Segments Completed"
@@ -25,9 +26,10 @@ class TotalUniqueSegmentsTidbit(TriviaTidbitBase):
         self.segment_counter: Counter[int] = Counter()
 
     def process_activity(self, activity: Activity) -> None:
-        self.segment_counter.update(
-            segment_effort.segment.id for segment_effort in activity.segment_efforts
-        )
+        if activity.segment_efforts is not None:
+            self.segment_counter.update(
+                segment_effort.segment.id for segment_effort in activity.segment_efforts
+            )
 
     def get_description(self) -> str:
         return "Total Unique Segments Completed"
@@ -41,15 +43,21 @@ class MostRanSegmentTidbit(TriviaTidbitBase):
         self.segment_counter: Counter[int] = Counter()
 
     def process_activity(self, activity: Activity) -> None:
-        self.segment_counter.update(
-            segment_effort.segment.id for segment_effort in activity.segment_efforts
-        )
+        if activity.segment_efforts is not None:
+            self.segment_counter.update(
+                segment_effort.segment.id for segment_effort in activity.segment_efforts
+            )
 
     def get_description(self) -> str:
         return "Most Popular Segment"
 
     def get_tidbit(self) -> Optional[str]:
-        return f"{self.segment_counter.most_common(1)[0][1]} completions"
+        most_common_segment = self.segment_counter.most_common(1)
+        if not most_common_segment:
+            return None
+
+        segment_id, num_completions = most_common_segment[0]
+        return f"{num_completions} completions"
 
     def get_segment_id(self) -> Optional[int]:
         return self.segment_counter.most_common(1)[0][0]
