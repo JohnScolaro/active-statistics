@@ -14,8 +14,10 @@ from flask import (
     session,
     url_for,
 )
+from requests.exceptions import HTTPError
 from rq.job import JobStatus
 from stravalib.client import Client
+from stravalib.exc import RateLimitExceeded
 from stravalib.model import Athlete
 from werkzeug.wrappers import Response
 
@@ -87,19 +89,24 @@ def authenticate() -> Response:
     # Do some terrible scope checking.
     # If we aren't given permission to read activities, just return to index.
     if scope != "read,activity:read":
-        return redirect(url_for("home"))
+        return redirect(url_for("index", scope_incorrect=True))
 
-    client = Client()
-    token_response = client.exchange_code_for_token(
-        client_id=evm.get_strava_client_id(),
-        client_secret=evm.get_strava_client_secret(),
-        code=code,
-    )
-    client.access_token = token_response["access_token"]
+    # Try the following. It can fail in a couple different ways, all due to
+    # hitting the Strava rate limit.
+    try:
+        client = Client()
+        token_response = client.exchange_code_for_token(
+            client_id=evm.get_strava_client_id(),
+            client_secret=evm.get_strava_client_secret(),
+            code=code,
+        )
+        client.access_token = token_response["access_token"]
 
-    athlete: Athlete = client.get_athlete()
-    redis.set_strava_access_tokens(athlete.id, token_response)
-    session["athlete_id"] = athlete.id
+        athlete: Athlete = client.get_athlete()
+        redis.set_strava_access_tokens(athlete.id, token_response)
+        session["athlete_id"] = athlete.id
+    except (HTTPError, RateLimitExceeded) as e:
+        return redirect(url_for("index", rate_limit_exceeded=True))
 
     return redirect(url_for("home"))
 

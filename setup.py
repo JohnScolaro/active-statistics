@@ -28,6 +28,7 @@ types_requires = [
     "boto3-stubs[essential]==1.28.36",
     "types-Flask==1.1.6",
     "types-redis==4.6.0.5",
+    "types-requests==2.31.0.6",
     "pandas-stubs==2.0.3.230814",
     "types-setuptools==68.1.0.1",
 ]
