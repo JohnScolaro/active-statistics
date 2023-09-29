@@ -74,8 +74,13 @@ def get_and_save_detailed_activities(
     activity_num = 0
     while activity_num < len(activity_ids):
         try:
+            # Although unnecessary, by assigning this it's own variable, it
+            # should let Sentry record the specific event ID that breaks the
+            # app instead of returning the truncated list of all ID's.
+            activity_id_to_get = activity_ids[activity_num]
+
             detailed_activity = client.get_activity(
-                activity_ids[activity_num], include_all_efforts=True
+                activity_id_to_get, include_all_efforts=True
             )
             log(logger.info, f"Saving detailed data for activity {activity_num + 1}.")
             save_activity_to_file(athlete_id, detailed_activity)
