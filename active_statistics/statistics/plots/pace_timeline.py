@@ -15,9 +15,7 @@ from stravalib import unithelper as uh
 from stravalib.model import Activity, ActivityType
 
 from active_statistics.exceptions import UserVisibleException
-from active_statistics.statistics.utils.average_speed_utils import (
-    get_y_axis_settings,
-)
+from active_statistics.statistics.utils.average_speed_utils import get_y_axis_settings
 
 
 @dataclasses.dataclass
@@ -210,7 +208,11 @@ def generate_weighted_moving_average(
     final_dates: list[dt.datetime] = []
     final_values: list[float] = []
     for date, value in zip(dates, values):
-        if math.isnan(value) and math.isnan(final_values[-1]):
+        if (
+            len(final_values) != 0
+            and math.isnan(value)
+            and math.isnan(final_values[-1])
+        ):
             continue
         else:
             final_dates.append(date)
