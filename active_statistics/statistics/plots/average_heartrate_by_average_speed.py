@@ -146,7 +146,8 @@ def get_scatter_plot(
         for i in range(
             min(start_timestamps),
             max(start_timestamps),
-            (max(start_timestamps) - min(start_timestamps)) // 5,
+            # The outter max is stopping this from going below 1, which can happen in cases of very few activities.
+            max(1, (max(start_timestamps) - min(start_timestamps)) // 5),
         )
     ]
     ticktext = [dt.datetime.fromtimestamp(i).strftime("%d/%m/%Y") for i in tickvals]
