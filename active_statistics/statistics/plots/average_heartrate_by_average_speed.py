@@ -1,12 +1,16 @@
 import dataclasses
 import datetime as dt
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, Optional
 
 import plotly.graph_objects as go
 from stravalib import unithelper as uh
 from stravalib.model import Activity, ActivityType
 
 from active_statistics.exceptions import UserVisibleException
+from active_statistics.statistics.utils.average_speed_utils import (
+    average_speed_to_kmph,
+    average_speed_to_mins_per_km,
+)
 
 
 @dataclasses.dataclass
@@ -122,17 +126,13 @@ def get_scatter_plot(
 ) -> go.Figure:
     speed_conversion_function = get_speed_conversion_function(activity_type)
 
-    average_heartrates = [activity.average_heartrate for activity in activities]
-    average_paces: list[float] = [
-        speed_conversion_function(activity.average_speed) for activity in activities
-    ]
-
-    # If this is a run activity, convert paces into times for nice formatting.
-    if activity_type == "Run":
-        average_paces_running: list[dt.datetime] = [
-            dt.datetime(1970, 1, 1) + dt.timedelta(seconds=pace)
-            for pace in average_paces
-        ]
+    average_heartrates: list[float] = []
+    average_paces: list[float] = []
+    for activity in activities:
+        speed = speed_conversion_function(activity.average_speed)
+        if speed is not None:
+            average_heartrates.append(activity.average_heartrate)
+            average_paces.append(speed)
 
     start_times = [activity.start_date for activity in activities]
     start_timestamps = [int(start_time.timestamp()) for start_time in start_times]
@@ -154,7 +154,7 @@ def get_scatter_plot(
 
     return go.Scatter(
         x=average_heartrates,
-        y=average_paces if activity_type == "Ride" else average_paces_running,
+        y=average_paces,
         customdata=list(zip(distances_in_km, start_times)),
         mode="markers",
         marker=dict(
@@ -177,21 +177,13 @@ def get_scatter_plot(
     )
 
 
-def meters_per_second_to_seconds_per_kilometer(speed: uh.Quantity) -> float:
-    return float(1000 / speed.magnitude)
-
-
-def meters_per_second_to_kilometers_per_hour(speed: uh.Quantity) -> float:
-    return float(speed.magnitude / 1000 * 3600)
-
-
 def get_speed_conversion_function(
     activity_type: ActivityType,
-) -> Callable[[float], float]:
+) -> Callable[[float], Optional[Any]]:
     if activity_type == "Run":
-        return meters_per_second_to_seconds_per_kilometer
+        return average_speed_to_mins_per_km
     else:
-        return meters_per_second_to_kilometers_per_hour
+        return average_speed_to_kmph
 
 
 def get_hovertemplate_pace_formatting(activity_type: ActivityType) -> str:
