@@ -8,6 +8,3 @@ tmp_storage
 */logs/*
 *.egg-info
 build
-envs/*
-!envs/example.env
-!envs/prod.sh

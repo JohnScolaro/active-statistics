@@ -75,7 +75,6 @@ def chart_data() -> Response:
         json_data = f.read()
 
     chart_json = json.loads(json_data)
-    chart_json = json.dumps(chart_json)
     return make_response(jsonify(chart_json))
 
 
