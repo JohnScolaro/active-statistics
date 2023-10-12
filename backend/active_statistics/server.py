@@ -64,7 +64,7 @@ def index() -> Response:
     return make_response(render_template("index.html", strava_auth_url=strava_auth_url))
 
 
-@app.route("/example_chart_data")
+@app.route("/api/example_chart_data")
 def chart_data() -> Response:
     current_file_dir_path = os.path.dirname(os.path.realpath(__file__))
     example_chart_data_path = os.path.join(
@@ -106,7 +106,9 @@ def authenticate() -> Response:
     except (HTTPError, RateLimitExceeded) as e:
         return redirect(url_for("index", rate_limit_exceeded=True))
 
-    return redirect(url_for("home"))
+    response = make_response(redirect(url_for("home")))
+    response.set_cookie("logged_in", "true")
+    return response
 
 
 @app.route("/home")
@@ -465,9 +467,62 @@ def logout() -> Response:
     return redirect(url_for("index"))
 
 
+import dataclasses
+from typing import Any, Union
+
+from active_statistics.gui.tab_group import TabGroup
+from active_statistics.gui.tabs import Tab
+
+
+@dataclasses.dataclass
+class SideMenuTabs:
+    name: str
+    key: str
+    type: str
+    items: list[Any]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "key": self.key,
+            "type": self.type,
+            "items": self.items,
+        }
+
+
+@app.route("/api/tabs")
+def tabs_route() -> Response:
+    def expand_tabs(tabs: list[Union[Tab, TabGroup]]) -> dict[str, Any]:
+        json_tabs = []
+        for tab in tabs:
+            if isinstance(tab, TabGroup):
+                json_tabs.append(tab_to_dict(tab, items=expand_tabs(tab.children)))
+            else:
+                json_tabs.append(tab_to_dict(tab, items=[]))
+        return json_tabs
+
+    def tab_to_dict(tab: Tab, items: list[Any] = []) -> dict[str, Any]:
+        return SideMenuTabs(
+            name=tab.name, key=tab.get_key(), type=tab.get_type(), items=items
+        ).to_dict()
+
+    return expand_tabs(all_tabs)
+
+
 # Before the app starts, we want to generate all the routes for our tabs.
 for tab in all_tabs:
-    tab.generate_and_register_routes(app, evm)
+
+    def generate_and_register_routes_for_children(tab_group: TabGroup) -> None:
+        for tab in tab_group.children:
+            if isinstance(tab, Tab):
+                tab.generate_and_register_routes(app, evm)
+            if isinstance(tab, TabGroup):
+                generate_and_register_routes_for_children(tab)
+
+    if isinstance(tab, Tab):
+        tab.generate_and_register_routes(app, evm)
+    if isinstance(tab, TabGroup):
+        generate_and_register_routes_for_children(tab)
 
 
 if not evm.is_production():

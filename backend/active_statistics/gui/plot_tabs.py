@@ -118,3 +118,6 @@ class PlotTab(Tab):
             return plot_function
 
         app.add_url_rule(self.get_plot_endpoint(), view_func=get_plot_function(self))
+
+    def get_type(self) -> str:
+        return "plot_tab"

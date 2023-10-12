@@ -1,10 +1,11 @@
+from abc import ABC, abstractmethod
 from typing import Optional
 
 from active_statistics.utils.environment_variables import EnvironmentVariableManager
 from flask import Flask
 
 
-class Tab:
+class Tab(ABC):
     def __init__(self, name: str, detailed: bool, key: Optional[str] = None) -> None:
         self.name = name
         self.detailed = detailed
@@ -34,3 +35,7 @@ class Tab:
 
     def is_detailed(self) -> bool:
         return self.detailed
+
+    @abstractmethod
+    def get_type(self) -> str:
+        pass

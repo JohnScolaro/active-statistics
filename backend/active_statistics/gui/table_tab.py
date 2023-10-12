@@ -121,3 +121,6 @@ class TableTab(Tab):
             table_endpoint=self.get_data_endpoint(),
             key=self.get_key(),
         )
+
+    def get_type(self) -> str:
+        return "table_tab"
