@@ -6,10 +6,10 @@ import Image from 'next/image';
 import SideMenu from './side-menu';
 
 interface TopBarProps {
-    showBurgerMenu: boolean;
+    loggedIn: boolean;
 }
 
-export default function TopBar({ showBurgerMenu }: TopBarProps) {
+export default function TopBar({ loggedIn }: TopBarProps) {
     const [isMenuOpen, setMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -17,8 +17,8 @@ export default function TopBar({ showBurgerMenu }: TopBarProps) {
     };
 
     return (
-        <div className="bg-green-500 flex justify-between p-2 mt-2 ml-2 mr-2 rounded-lg h-14" >
-            {showBurgerMenu && (
+        <div className="bg-green-600 flex justify-between p-2 mt-2 ml-2 mr-2 rounded-lg h-14" >
+            {loggedIn && (
                 <button className="burger-menu" onClick={toggleMenu}>
                     &#9776;
                 </button>
@@ -27,7 +27,7 @@ export default function TopBar({ showBurgerMenu }: TopBarProps) {
             <a href="https://github.com/JohnScolaro/active-statistics">
                 <Image src="/github-mark-white.svg" width={0} height={0} alt='GitHub Logo' className='w-auto h-full' />
             </a>
-            {showBurgerMenu && <SideMenu isOpen={isMenuOpen} onClose={toggleMenu} />}
+            {loggedIn && <SideMenu isOpen={isMenuOpen} onClose={toggleMenu} />}
         </div >
     );
 }

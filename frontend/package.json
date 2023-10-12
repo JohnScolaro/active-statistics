@@ -9,7 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.13",
+    "@mui/material": "^5.14.13",
     "@next/font": "^13.5.4",
+    "cookies-next": "^4.0.0",
     "next": "latest",
     "plotly.js": "^2.26.1",
     "react": "latest",

@@ -7,7 +7,7 @@ in the client because that's a requirement of plotly.
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import Spinner from './spinner';
+import { CenteredSpinner } from './spinner';
 
 import dynamic from 'next/dynamic'
 
@@ -43,11 +43,7 @@ export default function PlotContainer({ dataURL }: PlotComponentProps) {
     if (isLoading) {
         return <div className='flex flex-row justify-center'>
             <div className='rounded-lg border-green-500 border-2 h-96 max-h-96 w-full max-w-3xl p-2'>
-                <div className='flex h-full flex-col justify-center'>
-                    <div className='flex flex-row justify-center'>
-                        <Spinner />
-                    </div>
-                </div>
+                <CenteredSpinner />
             </div>
         </div>;
     }

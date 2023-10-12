@@ -11,7 +11,7 @@
     width: 13px;
     height: 13px;
     border-radius: 50%;
-    background: theme('colors.green.500');
+    background: theme('colors.green.900');
     animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
 
