@@ -5,6 +5,8 @@ import TopBar from '@/components/top-bar'
 import { useRouter, usePathname } from 'next/navigation'
 import { getCookie } from 'cookies-next'
 import { useEffect, useState, useContext, createContext } from 'react'
+import { CenteredSpinner } from './spinner'
+import TopBarSplashPage from './top-bar-splash-page'
 
 const LoggedInContext = createContext(false);
 
@@ -18,34 +20,31 @@ export default function Base({
     children: React.ReactNode
 }) {
     const router = useRouter();
+    const [loading, setLoading] = useState(true);
     const [loggedIn, setLoggedIn] = useState(false);
-    const pathname = usePathname();
 
-    // Just once, on component load time, check if there is a "logged_in" cookie.
-    // Use it to set initial state.
     useEffect(() => {
-        console.log('1 ' + pathname);
+        // Check if there is a "logged_in" cookie.
+        const isLoggedIn = getCookie('logged_in') == 'true';
+        setLoggedIn(isLoggedIn);
+        setLoading(false); // Set loading to false after checking the cookie
+    }, []);
 
-        setLoggedIn(getCookie('logged_in') == 'true');
-    }, [])
-
-    // Every time the logged_in state changes, route to home or the splash page.
     useEffect(() => {
-        console.log('2 ' + pathname);
-
-        if (loggedIn && pathname == '/') {
-            router.push('/home');
+        if (!loading) {
+            if (!loggedIn) {
+                router.push('/');
+            }
         }
+    }, [loading, loggedIn]);
 
-        if (!loggedIn) {
-            router.push('/');
-        }
-
-    }, [loggedIn]);
+    if (loading) {
+        // Render a loading indicator or any content you prefer while checking the cookie.
+        return <CenteredSpinner />
+    }
 
     return <LoggedInContext.Provider value={loggedIn}>
         <div className="flex flex-col bg-green-100 h-screen">
-            <TopBar loggedIn={loggedIn} />
             {children}
         </div>
     </LoggedInContext.Provider>

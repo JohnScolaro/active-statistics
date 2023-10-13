@@ -49,7 +49,9 @@ app.secret_key = evm.get_flask_secret_key()
 def get_strava_auth_url() -> str:
     logger.info("getting auth url")
     scheme = "https" if evm.is_production() else "http"
-    redirect_uri = f"{scheme}://{evm.get_domain()}:{str(evm.get_port())}/authenticate"
+    redirect_uri = (
+        f"{scheme}://{evm.get_domain()}:{str(evm.get_port())}/api/authenticate"
+    )
 
     client = Client()
     authorize_url: str = client.authorization_url(
@@ -78,7 +80,7 @@ def chart_data() -> Response:
     return make_response(jsonify(chart_json))
 
 
-@app.route("/authenticate")
+@app.route("/api/authenticate")
 def authenticate() -> Response:
     # Retrieve query parameters
     code: str = request.args["code"]

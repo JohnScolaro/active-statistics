@@ -10,8 +10,12 @@ class TabGroup:
     key: str
     children: list[Union[Tab, "TabGroup"]]
 
-    def get_key(self):
-        return ""
+    def get_key(self) -> str:
+        if self.key is None:
+            # I can't be bothered using slugify.
+            return self.name.lower().replace(" ", "_")
+        else:
+            return self.key
 
     def get_type(self):
         return ""

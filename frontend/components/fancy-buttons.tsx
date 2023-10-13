@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { List, Collapse, ListItemButton } from "@mui/material";
+import { Collapse } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { CenteredSpinner } from "./spinner";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import Link from "next/link";
 export default function SideBarButtons() {
     // State to hold the retrieved menu data
     const [menuData, setMenuData] = useState([]);
+    const [selectedButtonKey, setSelectedButtonKey] = useState('');
 
     useEffect(() => {
         fetch('/api/tabs')
@@ -16,101 +17,84 @@ export default function SideBarButtons() {
             .catch((error) => console.error('Error fetching data:', error));
     }, []);
 
+    const handleButtonClick = (key: string) => {
+        setSelectedButtonKey(key);
+    };
+
     if (menuData.length == 0) {
         return <CenteredSpinner />
     } else {
-        return menuData.map((item, key) => <MenuItem key={key} item={item} />);
+        return menuData.map((item: Item) => <MenuItem item={item} key={item.key} indentation={0} selectedButtonKey={selectedButtonKey} setThisButtonSelected={handleButtonClick} />);
     }
 }
 
-const MenuItem = ({ item }) => {
-    const Component = hasChildren(item) ? MultiLevel : SingleLevel;
-    return <Component item={item} />;
+interface Item {
+    key: string;
+    name: string;
+    type: string;
+    items: Item[];
+}
+
+interface MenuItemProps {
+    item: Item;
+    indentation: number;
+    selectedButtonKey: string;
+    setThisButtonSelected: (key: string) => void;
+}
+
+const MenuItem = ({ item, indentation, selectedButtonKey, setThisButtonSelected }: MenuItemProps) => {
+    const Component = hasChildren(item) ? SideBarMultiLevelButton : SideBarButton;
+    return <Component item={item} indentation={indentation} selectedButtonKey={selectedButtonKey} setThisButtonSelected={setThisButtonSelected} />;
 };
 
-const SingleLevel = ({ item }) => {
+
+function hasChildren(item: Item) {
+    return (item.items.length != 0);
+}
+
+const SideBarButton = ({ item, indentation, selectedButtonKey, setThisButtonSelected }: { item: Item, indentation: number, selectedButtonKey: string, setThisButtonSelected: (key: string) => void }) => {
+    const isSelected = selectedButtonKey === item.key;
+    const backgroundStyle = isSelected ? 'bg-green-300' : 'bg-green-400';
+
+
     return (
-        <Link href='/home/boogers'>
-            <ListItemButton disableGutters={true} disableRipple={true} disableTouchRipple={true} sx={list_item_button_style}>
-                <div>{item.name}</div>
-            </ListItemButton >
+        <Link href={`/home/${item.key}`} onClick={() => { setThisButtonSelected(item.key) }}>
+            <div className={`p-2 mb-2 rounded-lg ${backgroundStyle} hover:bg-green-300`}>
+                <SideBarButtonText text={item.name} indentation={indentation} />
+            </div>
         </Link>
     );
 };
 
-const MultiLevel = ({ item }) => {
-    const { items: children } = item;
+const SideBarMultiLevelButton = ({ item, indentation, selectedButtonKey, setThisButtonSelected }: { item: Item, indentation: number, selectedButtonKey: string, setThisButtonSelected: (key: string) => void }) => {
+    const items = item.items;
     const [open, setOpen] = useState(false);
 
     const handleClick = () => {
         setOpen((prev) => !prev);
     };
 
+    const iconStyle = {
+        transform: `rotate(${open ? 0 : 180}deg)`,
+        transition: 'transform 0.2s ease',
+    };
+
     return (
         <>
-            <ListItemButton disableGutters={true} disableRipple={true} disableTouchRipple={true} sx={list_item_group_style} onClick={handleClick}>
-                <div className="grow">{item.name}</div>
-                {open ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
+            <div className="flex flex-row p-2 mb-2 rounded-lg bg-green-400 hover:bg-green-600" onClick={handleClick}>
+                <SideBarButtonText text={item.name} indentation={0} />
+                <ExpandLess style={iconStyle} />
+            </div>
             <Collapse in={open} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding={true}>
-                    {children.map((child, key) => (
-                        <MenuItem key={key} item={child} />
-                    ))}
-                </List>
+                {items.map((item) => (
+                    <MenuItem item={item} key={item.key} indentation={indentation + 1} selectedButtonKey={selectedButtonKey} setThisButtonSelected={setThisButtonSelected} />
+                ))}
             </Collapse>
         </>
     );
 };
 
-
-function hasChildren(item) {
-    const { items: children } = item;
-
-    if (children === undefined) {
-        return false;
-    }
-
-    if (children.constructor !== Array) {
-        return false;
-    }
-
-    if (children.length === 0) {
-        return false;
-    }
-
-    return true;
+function SideBarButtonText({ text, indentation }: { text: string, indentation: number }) {
+    const marginLeft = `${indentation}em`;
+    return <div className="grow" style={{ marginLeft }}>{text}</div>;
 }
-
-const list_item_button_style = {
-    'backgroundColor': 'rgb(74 222 128)',
-    'padding': '0.5rem',
-    'border-radius': '0.5rem',
-    '&:hover': {
-        'backgroundColor': 'rgb(21 128 61)'
-    },
-    'marginBottom': '0.5rem',
-};
-
-const list_item_group_style = {
-    'backgroundColor': 'rgb(74 222 128)',
-    'padding': '0.5rem',
-    'border-radius': '0.5rem',
-    '&:hover': {
-        'backgroundColor': 'rgb(21 128 61)'
-    },
-    'marginBottom': '0.5rem',
-}
-
-
-// bg-green-50 ->   rgb(240 253 244);
-// bg-green-100 ->  rgb(220 252 231);
-// bg-green-200 ->  rgb(187 247 208);
-// bg-green-300 ->  rgb(134 239 172);
-// bg-green-400 ->  rgb(74 222 128);
-// bg-green-500 ->  rgb(34 197 94);
-// bg-green-600 ->  rgb(22 163 74);
-// bg-green-700 ->  rgb(21 128 61);
-// bg-green-800 ->  rgb(22 101 52);
-// bg-green-900 ->  rgb(20 83 45);
-// bg-green-950 ->  rgb(5 46 22);
