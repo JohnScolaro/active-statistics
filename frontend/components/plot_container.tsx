@@ -7,7 +7,7 @@ in the client because that's a requirement of plotly.
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { CenteredSpinner } from './spinner';
+import { CenteredSpinner } from './spinner/spinner';
 
 import dynamic from 'next/dynamic'
 

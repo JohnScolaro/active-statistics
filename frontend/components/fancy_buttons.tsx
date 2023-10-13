@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { Collapse } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { CenteredSpinner } from "./spinner";
+import { CenteredSpinner } from "./spinner/spinner";
 import Link from "next/link";
 
 export default function SideBarButtons() {

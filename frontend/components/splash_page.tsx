@@ -1,5 +1,5 @@
-import PlotContainer from "./plot-container";
-import StravaLoginButton from "./strava-login-button";
+import PlotContainer from "./plot_container";
+import StravaLoginButton from "./strava_login_button";
 import Image from "next/image";
 
 export default function SplashPage() {

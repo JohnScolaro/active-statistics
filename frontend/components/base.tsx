@@ -1,12 +1,12 @@
 'use client'
 
 import '../app/globals.css'
-import TopBar from '@/components/top-bar'
+import TopBar from '@/components/top_bar'
 import { useRouter, usePathname } from 'next/navigation'
 import { getCookie } from 'cookies-next'
 import { useEffect, useState, useContext, createContext } from 'react'
-import { CenteredSpinner } from './spinner'
-import TopBarSplashPage from './top-bar-splash-page'
+import { CenteredSpinner } from './spinner/spinner'
+import TopBarSplashPage from './top_bar_splash_page'
 
 const LoggedInContext = createContext(false);
 

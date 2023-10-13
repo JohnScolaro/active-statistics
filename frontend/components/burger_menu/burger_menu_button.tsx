@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import styles from './burger-menu-button.module.css'
+import styles from './burger_menu_button.module.css'
 
 interface BurgerMenuIconProps {
     onButtonClick: () => void;

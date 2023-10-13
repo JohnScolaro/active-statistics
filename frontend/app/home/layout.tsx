@@ -1,7 +1,7 @@
 'use client'
 
-import SideBarButtons from "@/components/fancy-buttons"
-import TopBar from "@/components/top-bar"
+import SideBarButtons from "@/components/fancy_buttons"
+import TopBar from "@/components/top_bar"
 import { useState } from "react"
 
 export default function HomeLayout({
