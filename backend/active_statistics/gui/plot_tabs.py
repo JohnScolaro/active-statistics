@@ -36,43 +36,13 @@ class PlotTab(Tab):
         self.description = description
         self.plot_function = plot_function
 
-    def get_main_content(self) -> str:
-        return render_template(
-            "plot_tab_main_content_container.html",
-            explanation=self.description,
-            plot_endpoint=self.get_plot_endpoint(),
-            key=self.get_key(),
-        )
-
     def get_plot_endpoint(self) -> str:
-        return f"/plot/{self.get_key()}"
+        return f"/api/data/{self.get_key()}"
 
     def get_plot_function(self) -> Callable[[Iterator[Activity]], go.Figure]:
         return self.plot_function
 
     def generate_and_register_routes(
-        self, app: Flask, evm: EnvironmentVariableManager
-    ) -> None:
-        self.generate_and_register_page_function(app, evm)
-        self.generate_and_register_plot_function(app, evm)
-
-    def generate_and_register_page_function(
-        self, app: Flask, evm: EnvironmentVariableManager
-    ) -> None:
-        # These functions generate the view functions we need for each route.
-        def get_page_function(tab: PlotTab) -> Callable[[], Response]:
-            def page_function() -> Response:
-                if "athlete_id" not in session:
-                    return redirect(url_for("index"))
-
-                return make_response(tab.get_main_content())
-
-            page_function.__name__ = f"{tab.get_key()}_page"
-            return page_function
-
-        app.add_url_rule(self.get_page_endpoint(), view_func=get_page_function(self))
-
-    def generate_and_register_plot_function(
         self, app: Flask, evm: EnvironmentVariableManager
     ) -> None:
         def get_plot_function(tab: PlotTab):
@@ -110,7 +80,11 @@ class PlotTab(Tab):
                     chart_dict = json.loads(chart_json_string)
 
                 # Add the key to the response so that the frontend knows which tab the data is for.
-                response_json = {"key": tab.get_key(), "chart_json": chart_dict}
+                response_json = {
+                    "key": tab.get_key(),
+                    "chart_json": chart_dict,
+                    "type": self.__class__.__name__,
+                }
 
                 return make_response(jsonify(response_json))
 
