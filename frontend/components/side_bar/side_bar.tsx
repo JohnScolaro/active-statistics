@@ -5,6 +5,7 @@ import { ExpandLess } from "@mui/icons-material";
 import { CenteredSpinner } from "../spinner/spinner";
 import Link from "next/link";
 import styles from "./side_bar.module.css";
+import { usePathname } from "next/navigation";
 
 interface SideBarProps {
   sidebarVisible: boolean;
@@ -25,7 +26,6 @@ export default function SideBar(props: SideBarProps) {
 function SideBarButtons() {
   // Sidebar data state
   const [menuData, setMenuData] = useState([]);
-  const [selectedButtonKey, setSelectedButtonKey] = useState("");
 
   useEffect(() => {
     fetch("/api/tabs")
@@ -33,10 +33,6 @@ function SideBarButtons() {
       .then((data) => setMenuData(data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
-
-  const handleButtonClick = (key: string) => {
-    setSelectedButtonKey(key);
-  };
 
   // Create the download_strava_data tab manually here.
   const download_strava_data_step = (
@@ -49,8 +45,6 @@ function SideBarButtons() {
       }} // Replace with your fixed data
       key="download_strava_data"
       indentation={0}
-      selectedButtonKey={selectedButtonKey}
-      setThisButtonSelected={handleButtonClick}
     />
   );
 
@@ -58,13 +52,7 @@ function SideBarButtons() {
     return <CenteredSpinner />;
   } else {
     const otherMenuItems = menuData.map((item: Item) => (
-      <MenuItem
-        item={item}
-        key={item.key}
-        indentation={0}
-        selectedButtonKey={selectedButtonKey}
-        setThisButtonSelected={handleButtonClick}
-      />
+      <MenuItem item={item} key={item.key} indentation={0} />
     ));
     const menuItems = [download_strava_data_step, ...otherMenuItems];
     return menuItems;
@@ -81,52 +69,24 @@ interface Item {
 interface MenuItemProps {
   item: Item;
   indentation: number;
-  selectedButtonKey: string;
-  setThisButtonSelected: (key: string) => void;
 }
 
-const MenuItem = ({
-  item,
-  indentation,
-  selectedButtonKey,
-  setThisButtonSelected,
-}: MenuItemProps) => {
+const MenuItem = ({ item, indentation }: MenuItemProps) => {
   const Component = hasChildren(item) ? SideBarMultiLevelButton : SideBarButton;
-  return (
-    <Component
-      item={item}
-      indentation={indentation}
-      selectedButtonKey={selectedButtonKey}
-      setThisButtonSelected={setThisButtonSelected}
-    />
-  );
+  return <Component item={item} indentation={indentation} />;
 };
 
 function hasChildren(item: Item) {
   return item.items.length != 0;
 }
 
-const SideBarButton = ({
-  item,
-  indentation,
-  selectedButtonKey,
-  setThisButtonSelected,
-}: {
-  item: Item;
-  indentation: number;
-  selectedButtonKey: string;
-  setThisButtonSelected: (key: string) => void;
-}) => {
-  const isSelected = selectedButtonKey === item.key;
-  const backgroundStyle = isSelected ? "bg-green-300" : "bg-green-400";
+const SideBarButton = ({ item, indentation }: { item: Item; indentation: number }) => {
+  const link_url = `/home/${item.key}`;
+  const pathname = usePathname();
+  const backgroundStyle = pathname == link_url ? "bg-green-300" : "bg-green-400";
 
   return (
-    <Link
-      href={`/home/${item.key}`}
-      onClick={() => {
-        setThisButtonSelected(item.key);
-      }}
-    >
+    <Link href={`/home/${item.key}`}>
       <div className={`p-2 mb-2 rounded-lg ${backgroundStyle} hover:bg-green-300`}>
         <SideBarButtonText text={item.name} indentation={indentation} />
       </div>
@@ -137,13 +97,9 @@ const SideBarButton = ({
 const SideBarMultiLevelButton = ({
   item,
   indentation,
-  selectedButtonKey,
-  setThisButtonSelected,
 }: {
   item: Item;
   indentation: number;
-  selectedButtonKey: string;
-  setThisButtonSelected: (key: string) => void;
 }) => {
   const items = item.items;
   const [open, setOpen] = useState(false);
@@ -168,13 +124,7 @@ const SideBarMultiLevelButton = ({
       </div>
       <Collapse in={open} timeout="auto" unmountOnExit>
         {items.map((item) => (
-          <MenuItem
-            item={item}
-            key={item.key}
-            indentation={indentation + 1}
-            selectedButtonKey={selectedButtonKey}
-            setThisButtonSelected={setThisButtonSelected}
-          />
+          <MenuItem item={item} key={item.key} indentation={indentation + 1} />
         ))}
       </Collapse>
     </>
