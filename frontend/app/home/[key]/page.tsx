@@ -55,11 +55,13 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
 
   if (data.type == "TriviaTab" || data.type == "TableTab") {
     return (
-      <Table
-        table_data={data.chart_json.table_data}
-        show_headings={data.chart_json.show_headings}
-        column_info={data.chart_json.columns}
-      />
+      <div className="flex justify-center">
+        <Table
+          table_data={data.chart_json.table_data}
+          show_headings={data.chart_json.show_headings}
+          column_info={data.chart_json.columns}
+        />
+      </div>
     );
   }
 
