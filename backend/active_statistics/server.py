@@ -60,12 +60,6 @@ def get_strava_auth_url() -> str:
     return authorize_url
 
 
-@app.route("/")
-def index() -> Response:
-    strava_auth_url = get_strava_auth_url()
-    return make_response(render_template("index.html", strava_auth_url=strava_auth_url))
-
-
 @app.route("/api/example_chart_data")
 def chart_data() -> Response:
     current_file_dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -113,31 +107,7 @@ def authenticate() -> Response:
     return response
 
 
-@app.route("/home")
-def home() -> Response:
-    # If the user is not logged in, we want to redirect them to the sign-in page.
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
-    tabs = [
-        (tab.name, tab.get_key(), tab.get_page_endpoint(), tab.is_detailed())
-        for tab in all_tabs
-    ]
-
-    # Check if we have activities for the user. If so, load clickable buttons, otherwise load non-clickable buttons.
-    return make_response(
-        render_template(
-            "home.html",
-            tabs=tabs,
-            default_content=render_template(
-                "download_data_main_content_container.html",
-                explanation="Welcome to Active Statistics! This tab is where you can refresh your plots with your latest data. There are two types of visualisation on this website. Visualisations that require 'detailed data' and visualisations that require summmary data. The summary and visualisation tabs are seperated on the left side with small horizontal lines. Summary data is automatically downloaded when you log in for the first time because it only takes a few seconds to download. If you wish to view visualisation that require detailed data, you'll have to manually click the 'refresh detailed data' button. Be prepared - this can take a while. It may take ~30 minutes if you have over 400 activities.",
-            ),
-        )
-    )
-
-
-@app.route("/refresh_summary_data")
+@app.route("/api/refresh_summary_data")
 def refresh_summary_data() -> Response:
     """
     When this endpoint is hit, we will endevour to re-download the users summary data, assuming they haven't already
@@ -191,7 +161,7 @@ def refresh_summary_data() -> Response:
     )
 
 
-@app.route("/refresh_detailed_data")
+@app.route("/api/refresh_detailed_data")
 def refresh_detailed_data() -> Response:
     """
     When this endpoint is hit, we will endevour to re-download the users detailed activity data, assuming they haven't
@@ -246,7 +216,7 @@ def refresh_detailed_data() -> Response:
     )
 
 
-@app.route("/summary_data_status")
+@app.route("/api/summary_data_status")
 def summary_data_status() -> Response:
     """
     An endpoint that is constantly polled by the webserver for the status of the data until
@@ -343,7 +313,7 @@ def summary_data_status() -> Response:
         # Shouldn't get here.
 
 
-@app.route("/detailed_data_status")
+@app.route("/api/detailed_data_status")
 def detailed_data_status() -> Response:
     """
     An endpoint that is constantly polled by the webserver for the status of the data until
@@ -440,7 +410,7 @@ def detailed_data_status() -> Response:
         # Shouldn't get here.
 
 
-@app.route("/download_data")
+@app.route("/api/download_data")
 def download_data() -> Response:
     if "athlete_id" not in session:
         return redirect(url_for("index"))
@@ -453,7 +423,7 @@ def download_data() -> Response:
     )
 
 
-@app.route("/logout")
+@app.route("/api/logout")
 def logout() -> Response:
     if "athlete_id" not in session:
         return redirect(url_for("index"))
@@ -467,6 +437,20 @@ def logout() -> Response:
 
     # Redirect to index to reconnect with strava.
     return redirect(url_for("index"))
+
+
+@app.route("/api/paid")
+def paid() -> Response:
+    """
+    Responds with whether this user is paid or not.
+    """
+    if "athlete_id" not in session:
+        return redirect(url_for("index"))
+
+    athlete_id = int(session["athlete_id"])
+
+    # For now, nobody has paid. Unless you're running this locally, then you can have access to it.
+    return {"paid": not evm.is_production()}
 
 
 import dataclasses

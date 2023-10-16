@@ -1,4 +1,3 @@
-from active_statistics.gui.download_strava_data_tab import DownloadStravaDataTab
 from active_statistics.gui.plot_tabs import PlotTab
 from active_statistics.gui.tab_group import TabGroup
 from active_statistics.gui.table_tab import TableTab
@@ -28,7 +27,6 @@ from active_statistics.statistics.trivia.min_max_summary_trivia import (
 from active_statistics.statistics.trivia.summary_trivia import general_trivia
 
 all_tabs: list[Tab] = [
-    DownloadStravaDataTab(name="Download Strava Data", detailed=False),
     TabGroup(
         name="Summary Data",
         key="summary_data",

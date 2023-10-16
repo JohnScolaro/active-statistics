@@ -38,10 +38,26 @@ function SideBarButtons() {
     setSelectedButtonKey(key);
   };
 
+  // Create the download_strava_data tab manually here.
+  const download_strava_data_step = (
+    <MenuItem
+      item={{
+        key: "download_strava_data",
+        name: "Download Strava Data",
+        type: "xxx",
+        items: [],
+      }} // Replace with your fixed data
+      key="download_strava_data"
+      indentation={0}
+      selectedButtonKey={selectedButtonKey}
+      setThisButtonSelected={handleButtonClick}
+    />
+  );
+
   if (menuData.length == 0) {
     return <CenteredSpinner />;
   } else {
-    return menuData.map((item: Item) => (
+    const otherMenuItems = menuData.map((item: Item) => (
       <MenuItem
         item={item}
         key={item.key}
@@ -50,6 +66,8 @@ function SideBarButtons() {
         setThisButtonSelected={handleButtonClick}
       />
     ));
+    const menuItems = [download_strava_data_step, ...otherMenuItems];
+    return menuItems;
   }
 }
 

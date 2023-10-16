@@ -1,3 +1,8 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
 export default function Home() {
-    return "Lorem Ipsum or some other bullshit ".repeat(20)
+  const router = useRouter();
+  router.push("/home/download_strava_data");
 }
