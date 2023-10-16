@@ -1,5 +1,6 @@
+import dataclasses
 import json
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Callable, Iterator, Literal, Optional
 
 import pandas as pd
 from active_statistics.gui.tabs import Tab
@@ -20,6 +21,14 @@ from flask import (
 )
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
+
+ColumnTypes = Literal["string", "link"]
+
+
+@dataclasses.dataclass
+class LinkCell:
+    url: str
+    text: str
 
 
 class TableTab(Tab):
@@ -64,7 +73,11 @@ class TableTab(Tab):
                     table_data = self.get_table_data(activity_iterator)
 
                 # Add the key to the response so that the frontend knows which tab the data is for.
-                response_json = {"key": tab.get_key(), "chart_json": table_data}
+                response_json = {
+                    "key": tab.get_key(),
+                    "chart_json": table_data,
+                    "type": self.__class__.__name__,
+                }
 
                 return make_response(jsonify(response_json))
 
@@ -78,15 +91,39 @@ class TableTab(Tab):
             raise Exception("Table tab has no function to generate a table.")
         return self.table_function(activities)
 
+    def get_table_column_types(self) -> dict[str, ColumnTypes]:
+        return {}
+
     def has_column_headings(self):
         return True
 
+    def get_columns(self, df: pd.DataFrame) -> list[dict[str, str]]:
+        column_types = self.get_table_column_types()
+        return [
+            {"column_name": col, "column_type": column_types.get(col, "string")}
+            for col in df.columns
+        ]
+
     def get_table_data(self, activities: Iterator[Activity]) -> dict[str, Any]:
         df = self.get_table_dataframe(activities)
+
+        def serialise_linkcells(
+            linkcell: Optional[LinkCell],
+        ) -> Optional[dict[str, Any]]:
+            if linkcell is not None:
+                return dataclasses.asdict(linkcell)
+            else:
+                return None
+
+        column_types = self.get_table_column_types()
+        for col in df.columns:
+            if column_types.get(col, "string") == "link":
+                df[col] = df[col].apply(serialise_linkcells)
+
         return {
             "table_data": df.to_dict(orient="list"),
             "show_headings": self.has_column_headings(),
-            "heading_order": list(df.columns),
+            "columns": self.get_columns(df),
         }
 
     def get_data_endpoint(self) -> str:

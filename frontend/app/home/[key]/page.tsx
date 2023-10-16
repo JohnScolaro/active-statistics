@@ -3,6 +3,7 @@
 import { CenteredSpinner } from "@/components/spinner/spinner";
 import { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
+import Table from "./components/table/table";
 
 export default function Page({ params }: { params: { key: string } }) {
   const [loaded, setLoaded] = useState(false);
@@ -51,6 +52,17 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
       />
     );
   }
+
+  if (data.type == "TriviaTab" || data.type == "TableTab") {
+    return (
+      <Table
+        table_data={data.chart_json.table_data}
+        show_headings={data.chart_json.show_headings}
+        column_info={data.chart_json.columns}
+      />
+    );
+  }
+
   return (
     <>
       <div>Content key: {params.key}</div>

@@ -38,5 +38,12 @@ class TriviaTab(TableTab):
             }
         )
 
+    def get_table_column_types(self):
+        return {
+            "tidbit_description": "string",
+            "tidbit_info": "string",
+            "optional_link": "link",
+        }
+
     def has_column_headings(self):
         return False

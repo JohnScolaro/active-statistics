@@ -3,7 +3,7 @@ from typing import Iterator, Optional
 
 from active_statistics.statistics.utils.strava_links import (
     get_activity_url,
-    get_html_link,
+    get_link,
     get_segment_url,
 )
 from stravalib.model import Activity
@@ -72,9 +72,9 @@ class TriviaTidbitBase(ABC):
             raise Exception("Only implement one id getting function.")
 
         if activity_id is not None:
-            return get_html_link(get_activity_url(activity_id))
+            return get_link(get_activity_url(activity_id))
         elif segment_id is not None:
-            return get_html_link(get_segment_url(segment_id))
+            return get_link(get_segment_url(segment_id))
         else:
             return None
 
