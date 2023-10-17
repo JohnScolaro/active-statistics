@@ -16,7 +16,7 @@ def get_athlete_storage_location(athlete_id: int) -> str:
     # Get the current script's directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    storage_folder_name = "tmp_storage" if evm.use_s3() else "storage"
+    storage_folder_name = "tmp_storage" if evm.use_s3() else "storage2"
 
     storage_dir = os.path.join(current_dir, "..", storage_folder_name)
     if not os.path.exists(storage_dir):

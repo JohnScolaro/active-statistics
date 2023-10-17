@@ -65,7 +65,11 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
     setSidebarVisible(!sidebarVisible);
   };
 
-  function pollDataStatus(type: "detailed" | "summary") {
+  function pollDataStatus(
+    type: "detailed" | "summary",
+    callback?: (status: any) => void
+  ) {
+    // If polling has finished, the callback is called.
     if (type == "detailed") {
       var url = "/api/detailed_data_status";
     } else if (type == "summary") {
@@ -74,21 +78,20 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
       throw new Error("Unknown type of data to query recieved.");
     }
 
+    const setDataStatus =
+      type == "summary" ? setSummaryDataStatus : setDetailedDataStatus;
+
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
         updateDisabledSidebarSteps(type, data.status, setDisabledSidebarSteps);
-        if (type == "summary") {
-          setSummaryDataStatus(data);
-          if (!data.stop_polling) {
-            // If stopPolling is not true, poll again after 2 seconds
-            setTimeout(() => pollDataStatus(type), 2000);
-          }
-        } else if (type == "detailed") {
-          setDetailedDataStatus(data);
-          if (!data.stop_polling) {
-            // If stopPolling is not true, poll again after 2 seconds
-            setTimeout(() => pollDataStatus(type), 2000);
+        setDataStatus(data);
+        if (!data.stop_polling) {
+          // If stopPolling is not true, poll again after 2 seconds
+          setTimeout(() => pollDataStatus(type, callback), 2000);
+        } else {
+          if (callback) {
+            callback(data.status);
           }
         }
       })
@@ -137,7 +140,34 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (summaryDataStatus.stopPolling == false) {
-      pollDataStatus("summary");
+      pollDataStatus("summary", (status) => {
+        // If we finish polling, and the status is null, the only way that can
+        // happen is if we haven't ever gotten data for this user before. In
+        // this case, we want to kick off data downloading, and continue
+        // polling.
+        if (status == null) {
+          const url = "/api/refresh_summary_data";
+
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.refresh_accepted) {
+                setSummaryDataStatus({
+                  message: "Attempting to refresh data.",
+                  status: "",
+                  stopPolling: false,
+                });
+                pollDataStatus("summary");
+              } else {
+                setSummaryDataStatus({
+                  message: data.message,
+                  status: "too_recent",
+                  stopPolling: true,
+                });
+              }
+            });
+        }
+      });
     }
   }, [summaryDataStatus.stopPolling]);
 

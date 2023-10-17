@@ -106,7 +106,7 @@ const SideBarButton = ({ item, indentation, disabled }: ButtonOrMultiButtonProps
 
   const enabledBgStyle =
     pathname == link_url ? "bg-green-400" : "bg-green-400 hover:bg-green-300";
-  const disabledBgStyle = "bg-gray-400 text-gray-500";
+  const disabledBgStyle = "bg-gray-400 text-gray-600";
 
   if (disabled) {
     return (
@@ -155,7 +155,7 @@ const SideBarMultiLevelButton = ({
     <>
       <div
         className={`flex flex-row p-2 mb-2 rounded-lg ${
-          disabled ? "bg-gray-400 text-gray-500" : "bg-green-400 hover:bg-green-600"
+          disabled ? "bg-gray-400 text-gray-600" : "bg-green-400 hover:bg-green-600"
         }`}
         onClick={handleClick}
       >

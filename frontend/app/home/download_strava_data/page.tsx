@@ -69,10 +69,10 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
     dataStatus.status == "unknown"
   ) {
     statusContent = <Spinner />;
-  } else if (dataStatus.status == "cancelled" || dataStatus.status == "failed") {
-    statusContent = "❌";
   } else if (dataStatus.status == "too_recent") {
     statusContent = "✋";
+  } else if (dataStatus.status == "cancelled" || dataStatus.status == "failed") {
+    statusContent = "❌";
   } else {
     statusContent = "❌";
   }
@@ -120,7 +120,7 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
 
   return (
     <div className="relative md:w-1/2 md:grow">
-      <div className={`bg-green-200 p-2 rounded-lg ${disable_and_blur ? "blur-sm" : ""}`}>
+      <div className={`bg-green-200 p-2 rounded-lg ${disable_and_blur ? "blur-md" : ""}`}>
         <div className="flex flex-col items-center">
           <div className="text-xl sm:text-xl lg:text-2xl">{title}</div>
           <div className="h-2" />
