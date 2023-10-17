@@ -102,7 +102,7 @@ def authenticate() -> Response:
     except (HTTPError, RateLimitExceeded) as e:
         return redirect(url_for("index", rate_limit_exceeded=True))
 
-    response = make_response(redirect(url_for("home")))
+    response = make_response(redirect("/home"))
     response.set_cookie("logged_in", "true")
     return response
 

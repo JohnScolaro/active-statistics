@@ -9,21 +9,26 @@ import { usePathname } from "next/navigation";
 
 interface SideBarProps {
   sidebarVisible: boolean;
+  availableSidebarSteps: string[];
 }
 
 export default function SideBar(props: SideBarProps) {
   return (
     <div
       className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 ${
-        props.sidebarVisible ? `absolute z-10 ${styles.custom_sidebar}` : "hidden"
+        props.sidebarVisible ? `absolute z-40 ${styles.custom_sidebar}` : "hidden"
       } lg:block`}
     >
-      <SideBarButtons />
+      <SideBarButtons availableSidebarSteps={props.availableSidebarSteps} />
     </div>
   );
 }
 
-function SideBarButtons() {
+interface SidebarButtonsProps {
+  availableSidebarSteps: string[];
+}
+
+function SideBarButtons(props: SidebarButtonsProps) {
   // Sidebar data state
   const [menuData, setMenuData] = useState([]);
 
@@ -45,6 +50,7 @@ function SideBarButtons() {
       }} // Replace with your fixed data
       key="download_strava_data"
       indentation={0}
+      disabled={false}
     />
   );
 
@@ -52,7 +58,12 @@ function SideBarButtons() {
     return <CenteredSpinner />;
   } else {
     const otherMenuItems = menuData.map((item: Item) => (
-      <MenuItem item={item} key={item.key} indentation={0} />
+      <MenuItem
+        item={item}
+        key={item.key}
+        indentation={0}
+        disabled={props.availableSidebarSteps.includes(item.key)}
+      />
     ));
     const menuItems = [download_strava_data_step, ...otherMenuItems];
     return menuItems;
@@ -69,38 +80,65 @@ interface Item {
 interface MenuItemProps {
   item: Item;
   indentation: number;
+  disabled: boolean;
 }
 
-const MenuItem = ({ item, indentation }: MenuItemProps) => {
-  const Component = hasChildren(item) ? SideBarMultiLevelButton : SideBarButton;
-  return <Component item={item} indentation={indentation} />;
+const MenuItem = ({ item, indentation, disabled }: MenuItemProps) => {
+  const ButtonOrMultiButton = hasChildren(item) ? SideBarMultiLevelButton : SideBarButton;
+  return (
+    <ButtonOrMultiButton item={item} indentation={indentation} disabled={disabled} />
+  );
 };
 
 function hasChildren(item: Item) {
   return item.items.length != 0;
 }
 
-const SideBarButton = ({ item, indentation }: { item: Item; indentation: number }) => {
+interface ButtonOrMultiButtonProps {
+  item: Item;
+  indentation: number;
+  disabled: boolean;
+}
+
+const SideBarButton = ({ item, indentation, disabled }: ButtonOrMultiButtonProps) => {
   const link_url = `/home/${item.key}`;
   const pathname = usePathname();
-  const backgroundStyle = pathname == link_url ? "bg-green-300" : "bg-green-400";
 
-  return (
-    <Link href={`/home/${item.key}`}>
-      <div className={`p-2 mb-2 rounded-lg ${backgroundStyle} hover:bg-green-300`}>
+  const enabledBgStyle =
+    pathname == link_url ? "bg-green-400" : "bg-green-400 hover:bg-green-300";
+  const disabledBgStyle = "bg-gray-400 text-gray-500";
+
+  if (disabled) {
+    return (
+      <div
+        className={`p-2 mb-2 rounded-lg flex ${
+          disabled ? disabledBgStyle : enabledBgStyle
+        } `}
+      >
         <SideBarButtonText text={item.name} indentation={indentation} />
+        🚫
       </div>
-    </Link>
-  );
+    );
+  } else {
+    return (
+      <Link href={`/home/${item.key}`}>
+        <div
+          className={`p-2 mb-2 rounded-lg flex ${
+            disabled ? disabledBgStyle : enabledBgStyle
+          } `}
+        >
+          <SideBarButtonText text={item.name} indentation={indentation} />
+        </div>
+      </Link>
+    );
+  }
 };
 
 const SideBarMultiLevelButton = ({
   item,
   indentation,
-}: {
-  item: Item;
-  indentation: number;
-}) => {
+  disabled,
+}: ButtonOrMultiButtonProps) => {
   const items = item.items;
   const [open, setOpen] = useState(false);
 
@@ -116,7 +154,9 @@ const SideBarMultiLevelButton = ({
   return (
     <>
       <div
-        className="flex flex-row p-2 mb-2 rounded-lg bg-green-400 hover:bg-green-600"
+        className={`flex flex-row p-2 mb-2 rounded-lg ${
+          disabled ? "bg-gray-400 text-gray-500" : "bg-green-400 hover:bg-green-600"
+        }`}
         onClick={handleClick}
       >
         <SideBarButtonText text={item.name} indentation={0} />
@@ -124,7 +164,12 @@ const SideBarMultiLevelButton = ({
       </div>
       <Collapse in={open} timeout="auto" unmountOnExit>
         {items.map((item) => (
-          <MenuItem item={item} key={item.key} indentation={indentation + 1} />
+          <MenuItem
+            item={item}
+            key={item.key}
+            indentation={indentation + 1}
+            disabled={disabled}
+          />
         ))}
       </Collapse>
     </>

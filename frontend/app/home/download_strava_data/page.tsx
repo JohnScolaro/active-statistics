@@ -1,18 +1,15 @@
 "use client";
 
+import { useContext } from "react";
+import { HomeContext } from "../layout";
+
 export default function Page() {
   return (
     <div className="flex flex-col gap-2">
       <WelcomeCard></WelcomeCard>
       <div className="flex flex-col md:flex-row md:justify-items-stretch gap-2">
-        <DownloadDataCard
-          message={"Download Summary Data"}
-          end_point={"test"}
-        ></DownloadDataCard>
-        <DownloadDataCard
-          message={"Download Detailed Data"}
-          end_point={"test"}
-        ></DownloadDataCard>
+        <DownloadDataCard type={"summary"}></DownloadDataCard>
+        <DownloadDataCard type={"detailed"}></DownloadDataCard>
       </div>
       <MoreInformationCard />
     </div>
@@ -53,36 +50,53 @@ function WelcomeCard() {
   );
 }
 
-function DownloadDataCard({
-  message,
-  end_point,
-  status,
-}: {
-  message: string;
-  end_point: string;
-  status: string;
-}) {
-  return (
-    <div className="bg-green-200 p-2 rounded-lg grow">
-      <div className="flex flex-col items-center">
-        <div className="text-xl sm:text-xl lg:text-2xl">{message}</div>
-        <div className="h-2" />
-        <div>
-          <b>Status:</b> {status}
-        </div>
-        <div className="h-2" />
-        <div className="text-8xl">✅</div>
-        <div className="h-2" />
-        <button
-          className="p-2 bg-green-400 rounded-lg"
-          onClick={() => {
-            console.log("yeet");
-          }}
-        >
-          Refresh Data
-        </button>
-        <div className="h-2" />
+function DownloadDataCard({ type }: { status: string; type: "summary" | "detailed" }) {
+  let homeContext = useContext(HomeContext);
+
+  console.log(homeContext);
+  const title = type == "detailed" ? "Download Detailed Data" : "Download Summary Data";
+  const disable_and_blur = type == "detailed" && !homeContext.paidUser.paid;
+  const message =
+    type == "detailed"
+      ? homeContext.detailedDataStatus.message
+      : homeContext.summaryDataStatus.message;
+
+  const notPaidMessage = (
+    <div className="absolute z-10 inset-0 flex flex-col justify-center p-4">
+      <div className="text-center text-xl">
+        Downloading Detailed Data Temporarily Disabled
       </div>
+      <div className="h-2"></div>
+      <div className="text-center text-8xl">🔒</div>
+      <div className="h-2"></div>
+      <div className="text-center text-base">Due to excessive API usage</div>
+    </div>
+  );
+
+  return (
+    <div className="grow relative">
+      <div className={`bg-green-200 p-2 rounded-lg ${disable_and_blur ? "blur-sm" : ""}`}>
+        <div className="flex flex-col items-center">
+          <div className="text-xl sm:text-xl lg:text-2xl">{title}</div>
+          <div className="h-2" />
+          <div>
+            <b>Status:</b> {message}
+          </div>
+          <div className="h-2" />
+          <div className="text-8xl">✅</div>
+          <div className="h-2" />
+          <button
+            className={`p-2 bg-green-400 rounded-lg ${disable_and_blur ? "z-0" : "z-20"}`}
+            onClick={() => {
+              console.log("yeet");
+            }}
+          >
+            Refresh Data
+          </button>
+          <div className="h-2" />
+        </div>
+      </div>
+      {disable_and_blur && notPaidMessage}
     </div>
   );
 }
@@ -99,6 +113,15 @@ function MoreInformationCard() {
       When you first log in, the website downloads your summary data, and runs a suite of
       graph and table generating scripts over your activities. The results of these
       scripts are saved, but your activities aren't stored.
+      <br></br>
+      <br></br>
+      <b>Why is my data download queued?</b>
+      <br></br>
+      <br></br>
+      Because this is a free project, I only have one worker processing data. If the
+      worker is processing someone else's activities, your request will be added to the
+      queue. You can safely close this webpage and come back later if you're stuck in the
+      queue.
       <br></br>
       <br></br>
       <b>Why can't I download my detailed data?</b>

@@ -9,7 +9,6 @@ export default function Table({
   show_headings: boolean;
   column_info: { column_name: string; column_type: string }[];
 }) {
-  console.log(column_info);
   return (
     <>
       <table className="bg-green-500 table-auto border-separate border-spacing-1 text-sm rounded-lg sm:text-base sm:border-spacing-2">
