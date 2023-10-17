@@ -1,8 +1,9 @@
+import dataclasses
 import datetime as dt
 import json
 import logging
 import os
-from typing import Optional
+from typing import Any, Optional
 
 from active_statistics.app_logging import SERVER, setup_server_logging
 from active_statistics.communication_schema import (
@@ -10,6 +11,8 @@ from active_statistics.communication_schema import (
     RefreshStatusMessage,
 )
 from active_statistics.gui.gui import all_tabs
+from active_statistics.gui.tab_group import TabGroup
+from active_statistics.gui.tabs import Tab
 from active_statistics.utils import human_readable_time, redis, rq
 from active_statistics.utils.environment_variables import evm
 from active_statistics.utils.local_storage import (
@@ -458,14 +461,7 @@ def paid() -> Response:
     athlete_id = int(session["athlete_id"])
 
     # For now, nobody has paid. Unless you're running this locally, then you can have access to it.
-    return {"paid": not evm.is_production()}
-
-
-import dataclasses
-from typing import Any, Union
-
-from active_statistics.gui.tab_group import TabGroup
-from active_statistics.gui.tabs import Tab
+    return make_response(jsonify({"paid": not evm.is_production()}))
 
 
 @dataclasses.dataclass
@@ -486,7 +482,7 @@ class SideMenuTabs:
 
 @app.route("/api/tabs")
 def tabs_route() -> Response:
-    def expand_tabs(tabs: list[Union[Tab, TabGroup]]) -> dict[str, Any]:
+    def expand_tabs(tabs: list[Tab | TabGroup]) -> list[Any]:
         json_tabs = []
         for tab in tabs:
             if isinstance(tab, TabGroup):
@@ -495,12 +491,12 @@ def tabs_route() -> Response:
                 json_tabs.append(tab_to_dict(tab, items=[]))
         return json_tabs
 
-    def tab_to_dict(tab: Tab, items: list[Any] = []) -> dict[str, Any]:
+    def tab_to_dict(tab: Tab | TabGroup, items: list[Any] = []) -> dict[str, Any]:
         return SideMenuTabs(
             name=tab.name, key=tab.get_key(), type=tab.get_type(), items=items
         ).to_dict()
 
-    return expand_tabs(all_tabs)
+    return make_response(jsonify(expand_tabs(all_tabs)))
 
 
 # Before the app starts, we want to generate all the routes for our tabs.

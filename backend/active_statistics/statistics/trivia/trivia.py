@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterator, Optional
 
+from active_statistics.gui.table_tab import LinkCell
 from active_statistics.statistics.utils.strava_links import (
     get_activity_url,
     get_link,
@@ -59,7 +60,7 @@ class TriviaTidbitBase(ABC):
         the url will be generated correctly.
         """
 
-    def get_tidbit_url(self) -> Optional[str]:
+    def get_tidbit_url(self) -> Optional[LinkCell]:
         """
         Returns the url of the tidbit. Not always required, but if the tidbit
         is something like: "Longest Run" it makes sense to link to the run so
@@ -93,8 +94,8 @@ class TriviaProcessor:
 
     def get_data(
         self, activities: Iterator[Activity]
-    ) -> list[tuple[str, str, Optional[str]]]:
-        trivia: list[tuple[str, str, Optional[str]]] = []
+    ) -> list[tuple[str, str, LinkCell | None]]:
+        trivia: list[tuple[str, str, LinkCell | None]] = []
 
         # Process activities
         for activity in activities:

@@ -26,7 +26,7 @@ from active_statistics.statistics.trivia.min_max_summary_trivia import (
 )
 from active_statistics.statistics.trivia.summary_trivia import general_trivia
 
-all_tabs: list[Tab] = [
+all_tabs: list[Tab | TabGroup] = [
     TabGroup(
         name="Summary Data",
         key="summary_data",

@@ -5,7 +5,7 @@ and then I can have typed access to all my variables later?
 """
 
 import os
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, PositiveInt
 
@@ -39,8 +39,8 @@ class EnvironmentVariableManager:
     class ValidEnvironmentVariables(BaseModel):
         domain: str
         port: PositiveInt
-        environment: Union[Literal["production"], Literal["development"]]
-        data_storage: Union[Literal["local"], Literal["s3"]]
+        environment: Literal["production"] | Literal["development"]
+        data_storage: Literal["local"] | Literal["s3"]
         sentry_server_dsn: Optional[str]
         sentry_worker_dsn: Optional[str]
         strava_client_id: int

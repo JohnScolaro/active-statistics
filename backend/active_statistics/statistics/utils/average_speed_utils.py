@@ -6,7 +6,7 @@ activity types. Here are all my utils for converting between them.
 import dataclasses
 import datetime as dt
 import math
-from typing import Callable, Optional, Union
+from typing import Callable, Optional
 
 from stravalib import unithelper as uh
 from stravalib.model import ActivityType
@@ -40,7 +40,7 @@ def average_speed_to_mins_per_km(
 
 @dataclasses.dataclass
 class AverageSpeedYAxisSettings:
-    conversion_function: Callable[[uh.Quantity], Union[None, float, dt.datetime]]
+    conversion_function: Callable[[uh.Quantity], None | float | dt.datetime]
     tick_format: Optional[str]
     axis_title: str
 

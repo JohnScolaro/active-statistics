@@ -9,6 +9,8 @@ import sentry_sdk
 from active_statistics.app_logging import TASK, setup_task_logging
 from active_statistics.gui.gui import all_tabs
 from active_statistics.gui.plot_tabs import PlotTab
+from active_statistics.gui.tab_group import TabGroup
+from active_statistics.gui.tabs import Tab
 from active_statistics.gui.trivia_tabs import TableTab
 from active_statistics.strava_custom_rate_limiters import DetailedTaskRateLimiter
 from active_statistics.utils import redis
@@ -165,7 +167,17 @@ def process_activities(athlete_id: int, detailed: bool) -> None:
     detailed activities to make plots. This gives us a bunch of data. This data
     is then saved to s3.
     """
-    for tab in all_tabs:
+
+    def flatten(tabs: list[Tab | TabGroup]) -> list[Tab]:
+        flattened_tabs = []
+        for tab in tabs:
+            if isinstance(tab, TabGroup):
+                flattened_tabs.extend(flatten(tab.children))
+            else:
+                flattened_tabs.append(tab)
+        return flattened_tabs
+
+    for tab in flatten(all_tabs):
         if tab.is_detailed() == detailed:
             try:
                 activity_iterator: Iterator[Activity] = (
