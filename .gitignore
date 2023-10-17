@@ -3,7 +3,6 @@
 __pycache__
 .pytest_cache
 .mypy_cache
-storage
 tmp_storage
 *.egg-info
 build

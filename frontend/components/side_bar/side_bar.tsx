@@ -105,7 +105,7 @@ const SideBarButton = ({ item, indentation, disabled }: ButtonOrMultiButtonProps
   const pathname = usePathname();
 
   const enabledBgStyle =
-    pathname == link_url ? "bg-green-400" : "bg-green-400 hover:bg-green-300";
+    pathname == link_url ? "bg-green-300" : "bg-green-400 hover:bg-green-300";
   const disabledBgStyle = "bg-gray-400 text-gray-600";
 
   if (disabled) {

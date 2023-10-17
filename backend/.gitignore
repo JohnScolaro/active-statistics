@@ -2,3 +2,4 @@ envs/*
 !envs/example.env
 !envs/prod.sh
 */logs/*
+storage*
