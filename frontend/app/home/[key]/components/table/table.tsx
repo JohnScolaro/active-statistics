@@ -17,7 +17,7 @@ export default function Table({
         </thead>
         <tbody>
           {table_data[column_info[0].column_name].map((_, index) =>
-            get_row(index, table_data, column_info)
+            get_row(index, table_data, column_info),
           )}
         </tbody>
       </table>
@@ -32,7 +32,7 @@ function get_headings(column: { column_name: string; column_type: string }) {
 function get_row(
   index: number,
   table_data: { [key: string]: any[] },
-  column_info: { column_name: string; column_type: string }[]
+  column_info: { column_name: string; column_type: string }[],
 ) {
   return (
     <tr className="bg-green-400 hover:bg-green-600" key={index}>

@@ -13,11 +13,11 @@ body {
 }
 
 .hyperlink {
-  @apply text-blue-700 underline
+  @apply text-blue-700 underline;
 }
 
 .hyperlink:visited {
-  @apply text-purple-900
+  @apply text-purple-900;
 }
 
 /* I stole these from stack overflow. It reformats the scrollbar to be pretty. */

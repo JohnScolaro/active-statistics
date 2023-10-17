@@ -20,7 +20,9 @@ export default function RateLimitExceededModal({
         <div className="p-2 bg-white rounded-lg flex flex-col">
           <div className="text-6xl text-center">😢 Oh no! 😰</div>
           <div className="h-4"></div>
-          <div>I've exhausted my Strava API limit. Please check back again later.</div>
+          <div>
+            I&apos;ve exhausted my Strava API limit. Please check back again later.
+          </div>
           <div className="h-10"></div>
           <button
             type="button"

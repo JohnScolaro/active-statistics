@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 export default function Index() {
   const searchParams = useSearchParams();
   const [modalState, setModalState] = useState(
-    searchParams.get("rate_limit_exceeded") == "true"
+    searchParams.get("rate_limit_exceeded") == "true",
   );
 
   const router = useRouter();

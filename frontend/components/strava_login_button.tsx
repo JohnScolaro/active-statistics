@@ -1,31 +1,47 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { useLoggedIn } from '@/components/base';
-import Link from 'next/link';
+import Image from "next/image";
+import { useLoggedIn } from "@/components/base";
+import Link from "next/link";
+import { getUrl } from "@/lib/links";
 
 export default function StravaLoginButton() {
-    const logged_in = useLoggedIn();
+  const logged_in = useLoggedIn();
 
-    // If we have logged in, make this button navigate us to the /home page.
-    // Otherwise it can take us to Strava.
-    if (logged_in) {
-        return <Link href='/home'>
-            <Image src="/btn_strava_connectwith_orange.svg" width={193} height={48} alt='Text saying: "Connect with Strava"' className='h-auto' />
-        </Link>
-    } else {
-        /*
+  // If we have logged in, make this button navigate us to the /home page.
+  // Otherwise it can take us to Strava.
+  if (logged_in) {
+    return (
+      <Link href="/home">
+        <Image
+          src="/btn_strava_connectwith_orange.svg"
+          width={193}
+          height={48}
+          alt='Text saying: "Connect with Strava"'
+          className="h-auto"
+        />
+      </Link>
+    );
+  } else {
+    /*
         Arguably this shouldn't be hard coded, but I don't want to rely on
         another Strava library since I'm already relying on Stravalib on the
         backend, and I don't want to query the backend for something that should
         obviously be static, so I'm just hardcoding it. I'll figure out something
         better to do later.
         */
-        const redirect_uri = 'http://localhost:3000/api/authenticate';
-        const link = `https://www.strava.com/oauth/authorize?client_id=106254&amp;redirect_uri=${redirect_uri}&amp;approval_prompt=auto&amp;scope=read%2Cactivity%3Aread&amp;response_type=code`;
-        return <a href={link}>
-            <Image src="/btn_strava_connectwith_orange.svg" width={193} height={48} alt='Text saying: "Connect with Strava"' className='h-auto' />
-        </a>
-    }
-
+    const redirect_uri = getUrl("/api/authenticate");
+    const link = `https://www.strava.com/oauth/authorize?client_id=106254&amp;redirect_uri=${redirect_uri}&amp;approval_prompt=auto&amp;scope=read%2Cactivity%3Aread&amp;response_type=code`;
+    return (
+      <a href={link}>
+        <Image
+          src="/btn_strava_connectwith_orange.svg"
+          width={193}
+          height={48}
+          alt='Text saying: "Connect with Strava"'
+          className="h-auto"
+        />
+      </a>
+    );
+  }
 }
