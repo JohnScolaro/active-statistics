@@ -22,7 +22,7 @@ export default function Page({ params }: { params: { key: string } }) {
         setError(true);
         setLoaded(true);
       });
-  }, []);
+  }, [params.key]);
 
   if (!loaded) {
     return <CenteredSpinner />;

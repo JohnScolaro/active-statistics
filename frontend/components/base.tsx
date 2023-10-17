@@ -30,7 +30,7 @@ export default function Base({ children }: { children: React.ReactNode }) {
         router.push("/");
       }
     }
-  }, [loading, loggedIn]);
+  }, [loading, loggedIn, router]);
 
   if (loading) {
     // Render a loading indicator or any content you prefer while checking the cookie.

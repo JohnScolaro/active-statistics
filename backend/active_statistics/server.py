@@ -171,6 +171,14 @@ def refresh_detailed_data() -> Response:
         return redirect(url_for("index"))
 
     athlete_id = int(session["athlete_id"])
+
+    # In case anyone decides to be smart and just manually ping this endpoint
+    # to get their detailed data without paying, check before refreshing the data:
+    if evm.is_production():
+        return make_response(
+            jsonify(RefreshStatusMessage(message="Nice try.", refresh_accepted=False))
+        )
+
     detailed_refresh_min_period = dt.timedelta(days=7)
 
     # Check redis to see if they've refreshed recently.

@@ -12,6 +12,6 @@ def timedelta_to_human_readable_string(timedelta: dt.timedelta) -> str:
     return (
         f"{timedelta.days} day{'' if timedelta.days == 1 else 's'}, "
         f"{timedelta.seconds // 3600} hour{'' if timedelta.seconds//3600 == 1 else 's'}, "
-        f"{(timedelta.seconds // 60) % 60} minute{'' if (timedelta.seconds // 60) % 60== 1 else ''}, "
+        f"{(timedelta.seconds // 60) % 60} minute{'' if (timedelta.seconds // 60) % 60== 1 else 's'}, "
         f"and {timedelta.seconds % 60} second{'' if timedelta.seconds % 60 == 1 else 's'}"
     )

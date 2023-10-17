@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 
 interface SideBarProps {
   sidebarVisible: boolean;
-  availableSidebarSteps: string[];
+  disabledSidebarSteps: string[];
 }
 
 export default function SideBar(props: SideBarProps) {
@@ -19,13 +19,13 @@ export default function SideBar(props: SideBarProps) {
         props.sidebarVisible ? `absolute z-40 ${styles.custom_sidebar}` : "hidden"
       } lg:block`}
     >
-      <SideBarButtons availableSidebarSteps={props.availableSidebarSteps} />
+      <SideBarButtons disabledSidebarSteps={props.disabledSidebarSteps} />
     </div>
   );
 }
 
 interface SidebarButtonsProps {
-  availableSidebarSteps: string[];
+  disabledSidebarSteps: string[];
 }
 
 function SideBarButtons(props: SidebarButtonsProps) {
@@ -45,7 +45,7 @@ function SideBarButtons(props: SidebarButtonsProps) {
       item={{
         key: "download_strava_data",
         name: "Download Strava Data",
-        type: "xxx",
+        type: "",
         items: [],
       }} // Replace with your fixed data
       key="download_strava_data"
@@ -62,7 +62,7 @@ function SideBarButtons(props: SidebarButtonsProps) {
         item={item}
         key={item.key}
         indentation={0}
-        disabled={props.availableSidebarSteps.includes(item.key)}
+        disabled={props.disabledSidebarSteps.includes(item.key)}
       />
     ));
     const menuItems = [download_strava_data_step, ...otherMenuItems];
