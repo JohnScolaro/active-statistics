@@ -3,11 +3,6 @@
 __pycache__
 .pytest_cache
 .mypy_cache
-storage
 tmp_storage
-*/logs/*
 *.egg-info
 build
-envs/*
-!envs/example.env
-!envs/prod.sh

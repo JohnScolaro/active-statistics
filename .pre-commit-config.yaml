@@ -22,3 +22,4 @@ repos:
         entry: mypy
         language: system
         types: [python]
+        args: ["--config-file", "backend/mypy.ini"]

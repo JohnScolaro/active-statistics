@@ -1,0 +1,52 @@
+.burger_menu_button {
+  height: 32px;
+  width: 40px;
+  cursor: pointer;
+}
+
+.burger_menu_button span,
+.burger_menu_button span::before,
+.burger_menu_button span::after {
+  background: #ffffff;
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 4px;
+  margin-top: 16px;
+
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -o-transform: rotate(deg);
+  transform: rotate(180deg);
+
+  -webkit-transition: 0.2s ease-in-out;
+  -moz-transition: 0.2s ease-in-out;
+  -o-transition: 0.2s ease-in-out;
+  transition: 0.2s ease-in-out;
+}
+
+.burger_menu_button span::before {
+  margin-top: -10px;
+}
+
+.burger_menu_button span::after {
+  margin-top: 10px;
+}
+
+.burger_menu_button.active span {
+  background: transparent;
+}
+
+.burger_menu_button.active span::before {
+  margin-top: 0;
+
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.burger_menu_button.active span::after {
+  transform: rotate(-45deg);
+  margin-top: 0;
+}

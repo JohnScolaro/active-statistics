@@ -13,8 +13,8 @@
             "presentation": {
                 "hidden": true,
             },
-            "envFile": "${workspaceFolder}/envs/dev_local.env",
-            "cwd": "${workspaceFolder}/active_statistics"
+            "envFile": "${workspaceFolder}/backend/envs/dev_local.env",
+            "cwd": "${workspaceFolder}/backend/active_statistics"
         },
         {
             "name": "ActiveStatistics Server (s3 data)",
@@ -28,14 +28,14 @@
             "presentation": {
                 "hidden": true,
             },
-            "envFile": "${workspaceFolder}/envs/dev_s3.env",
-            "cwd": "${workspaceFolder}/active_statistics"
+            "envFile": "${workspaceFolder}/backend/envs/dev_s3.env",
+            "cwd": "${workspaceFolder}/backend/active_statistics"
         },
         {
             "name": "RQ Summary Worker (s3 data)",
             "request": "launch",
             "type": "python",
-            "program": "${workspaceFolder}/.venv/bin/rq",
+            "program": "${workspaceFolder}/backend/.venv/bin/rq",
             "args": [
                 "worker",
                 "summary_queue",
@@ -45,7 +45,7 @@
                 "active_statistics.rq_settings"
             ],
             "console": "internalConsole",
-            "envFile": "${workspaceFolder}/envs/dev_s3.env",
+            "envFile": "${workspaceFolder}/backend/envs/dev_s3.env",
             "presentation": {
                 "hidden": true,
             },
@@ -54,7 +54,7 @@
             "name": "RQ Detailed Worker (s3 data)",
             "request": "launch",
             "type": "python",
-            "program": "${workspaceFolder}/.venv/bin/rq",
+            "program": "${workspaceFolder}/backend/.venv/bin/rq",
             "args": [
                 "worker",
                 "detailed_queue",
@@ -64,7 +64,7 @@
                 "active_statistics.rq_settings"
             ],
             "console": "internalConsole",
-            "envFile": "${workspaceFolder}/envs/dev_s3.env",
+            "envFile": "${workspaceFolder}/backend/envs/dev_s3.env",
             "presentation": {
                 "hidden": true,
             },
@@ -73,7 +73,7 @@
             "name": "RQ Summary Worker (local data)",
             "request": "launch",
             "type": "python",
-            "program": "${workspaceFolder}/.venv/bin/rq",
+            "program": "${workspaceFolder}/backend/.venv/bin/rq",
             "args": [
                 "worker",
                 "summary_queue",
@@ -83,7 +83,7 @@
                 "active_statistics.rq_settings"
             ],
             "console": "internalConsole",
-            "envFile": "${workspaceFolder}/envs/dev_local.env",
+            "envFile": "${workspaceFolder}/backend/envs/dev_local.env",
             "presentation": {
                 "hidden": true,
             },
@@ -92,7 +92,7 @@
             "name": "RQ Detailed Worker (local data)",
             "request": "launch",
             "type": "python",
-            "program": "${workspaceFolder}/.venv/bin/rq",
+            "program": "${workspaceFolder}/backend/.venv/bin/rq",
             "args": [
                 "worker",
                 "detailed_queue",
@@ -102,7 +102,7 @@
                 "active_statistics.rq_settings"
             ],
             "console": "internalConsole",
-            "envFile": "${workspaceFolder}/envs/dev_local.env",
+            "envFile": "${workspaceFolder}/backend/envs/dev_local.env",
             "presentation": {
                 "hidden": true,
             },

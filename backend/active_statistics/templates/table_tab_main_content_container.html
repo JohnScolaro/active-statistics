@@ -1,0 +1,18 @@
+<div class="explanation-container">
+    {{ explanation }}
+</div>
+<div class="table-container" id="table-container" data-key="{{ key }}" data-url="{{ table_endpoint }}">
+    <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</div>
+<script type="module">
+    import { tab_function } from "{{ url_for('static', filename='table_tab_script.js') }}";
+
+    $(document).ready(function () {
+        tab_function();
+    });
+</script>
