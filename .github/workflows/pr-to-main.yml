@@ -34,7 +34,7 @@ jobs:
         run: black ./backend --diff --check
 
       - name: Run mypy
-        run: mypy ./backend
+        run: mypy ./backend --config-file ./backend/mypy.ini
 
       - name: Run tests
         run: |
