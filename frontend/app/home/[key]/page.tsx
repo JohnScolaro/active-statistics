@@ -29,7 +29,7 @@ export default function Page({ params }: { params: { key: string } }) {
   }
 
   if (loaded && error) {
-    return <CringeError />;
+    return <Error />;
   }
 
   return <PageContentComponent params={params} data={data} />;
@@ -74,15 +74,22 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
   );
 }
 
-function CringeError() {
+function Error() {
   return (
     <div className="h-full items-center text-center max-w-1/2 mt-[33vw]">
-      OOPSIE 🙈 WOOPSIE!!
+      🚧 Oh no! 🚧
       <br />
       <br />
-      Uwu 💦😋😍 We made 👉 a fucky 🐛 wucky 😤👌🔥!!
+      Something went wrong! 😭
       <br />
-      The code 🚱 monkeys 🐒🙉🙈 are working 😩😫💪 VEWY 😟 HAWD 🍆 to fix 🔧 this!
+      Feel free to email me and tell me about it{" "}
+      <a className="hyperlink" href="mailto:johnscolaro95@gmail.com">
+        here
+      </a>
+      , or fix the code yourself{" "}
+      <a className="hyperlink" href="https://github.com/JohnScolaro/active-statistics">
+        here!
+      </a>
     </div>
   );
 }
