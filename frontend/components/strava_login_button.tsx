@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useLoggedIn } from "@/components/base";
 import Link from "next/link";
-import { getUrl } from "@/lib/links";
 
 export default function StravaLoginButton() {
   const logged_in = useLoggedIn();
@@ -30,8 +29,13 @@ export default function StravaLoginButton() {
         obviously be static, so I'm just hardcoding it. I'll figure out something
         better to do later.
         */
-    const redirect_uri = getUrl("/api/authenticate");
-    const link = `https://www.strava.com/oauth/authorize?client_id=106254&amp;redirect_uri=${redirect_uri}&amp;approval_prompt=auto&amp;scope=read%2Cactivity%3Aread&amp;response_type=code`;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    const protocol = window.location.protocol;
+    const portSuffix = port && port !== "" ? `:${port}` : "";
+    const authenticateRoute = `${protocol}//${hostname}${portSuffix}/api/authenticate`;
+
+    const link = `https://www.strava.com/oauth/authorize?client_id=106254&amp;redirect_uri=${authenticateRoute}&amp;approval_prompt=auto&amp;scope=read%2Cactivity%3Aread&amp;response_type=code`;
     return (
       <a href={link}>
         <Image
