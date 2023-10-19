@@ -189,7 +189,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
           setDetailedDataStatus,
         }}
       >
-        <TopBar burgerMenuFunction={toggleSidebar} />
+        <TopBar sidebarVisible={sidebarVisible} toggleSidebar={toggleSidebar} />
         <div className="flex flex-row p-2 gap-2 grow overflow-auto">
           <SideBar
             sidebarVisible={sidebarVisible}
