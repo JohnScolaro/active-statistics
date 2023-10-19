@@ -15,17 +15,52 @@ interface SideBarProps {
 
 export default function SideBar(props: SideBarProps) {
   return (
-    <div
-      className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 ${
-        props.sidebarVisible
-          ? `absolute z-40 ${styles.custom_sidebar} lg:static`
-          : "hidden"
-      } lg:block`}
-    >
-      <SideBarButtons disabledSidebarSteps={props.disabledSidebarSteps} />
-    </div>
+    <>
+      {/* This magic div is secretly behind the sidebar when it's open (when
+        the screen is small) and closes the bar when people click on it. */}
+      <div
+        className={`overflow-auto shrink-0 p-2 z-30 opacity-50 bg-slate-500 ${
+          props.sidebarVisible
+            ? `absolute z-40 ${styles.custom_behind_sidebar} lg:static`
+            : "hidden"
+        } lg:hidden`}
+        onClick={props.toggleSidebar}
+      ></div>
+      {/* This is the actual sidebar */}
+      <div
+        className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 ${
+          props.sidebarVisible
+            ? `absolute z-40 ${styles.custom_sidebar} lg:static`
+            : "hidden"
+        } lg:block`}
+      >
+        <SideBarButtons disabledSidebarSteps={props.disabledSidebarSteps} />
+      </div>
+    </>
   );
 }
+
+// export default function SideBar(props: SideBarProps) {
+//   return (
+//     <>
+//       {/* <div
+//         className={`h-full w-full left-0 bg-gray-500 z-30 opacity-40 ${
+//           props.sidebarVisible ? "absolute" : "hidden"
+//         }`}
+//         onClick={props.toggleSidebar}
+//       ></div> */}
+//       <div
+//         className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 ${
+//           props.sidebarVisible
+//             ? `absolute z-40 ${styles.custom_sidebar} transition-all`
+//             : `translate-x-[-300px] transition-all`
+//         } lg:block`}
+//       >
+//         <SideBarButtons disabledSidebarSteps={props.disabledSidebarSteps} />
+//       </div>
+//     </>
+//   );
+// }
 
 interface SidebarButtonsProps {
   disabledSidebarSteps: string[];
