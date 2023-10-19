@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 
 interface SideBarProps {
   sidebarVisible: boolean;
+  toggleSidebar: () => void;
   disabledSidebarSteps: string[];
 }
 
@@ -16,7 +17,9 @@ export default function SideBar(props: SideBarProps) {
   return (
     <div
       className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 ${
-        props.sidebarVisible ? `absolute z-40 ${styles.custom_sidebar}` : "hidden"
+        props.sidebarVisible
+          ? `absolute z-40 ${styles.custom_sidebar} lg:static`
+          : "hidden"
       } lg:block`}
     >
       <SideBarButtons disabledSidebarSteps={props.disabledSidebarSteps} />
