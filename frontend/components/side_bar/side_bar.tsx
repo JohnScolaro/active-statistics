@@ -20,7 +20,7 @@ export default function SideBar(props: SideBarProps) {
       {/* This magic div is secretly behind the sidebar when it's open (when
         the screen is small) and closes the bar when people click on it. */}
       <div
-        className={`overflow-auto shrink-0 p-2 z-30 opacity-100 ${
+        className={`overflow-auto shrink-0 p-2 z-30 ${
           props.sidebarVisible
             ? `absolute z-40 ${styles.custom_behind_sidebar} lg:static`
             : "hidden"
@@ -29,11 +29,9 @@ export default function SideBar(props: SideBarProps) {
       ></div>
       {/* This is the actual sidebar */}
       <div
-        className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 ${
-          props.sidebarVisible
-            ? `absolute z-40 ${styles.custom_sidebar} lg:static transition-all`
-            : `absolute z-40 ${styles.custom_sidebar} translate-x-[-300px] transition-all`
-        } lg:block`}
+        className={`w-72 h-full overflow-auto shrink-0 p-2 rounded-lg bg-green-500 absolute z-40 lg:block transition-all lg:static ${
+          styles.custom_sidebar
+        } ${props.sidebarVisible ? "" : "translate-x-[-300px] lg:translate-x-0"} `}
       >
         <SideBarButtons disabledSidebarSteps={props.disabledSidebarSteps} />
       </div>
