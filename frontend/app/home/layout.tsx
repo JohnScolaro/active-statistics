@@ -67,7 +67,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
 
   function pollDataStatus(
     type: "detailed" | "summary",
-    callback?: (status: any) => void,
+    callback?: (status: any) => void
   ) {
     // If polling has finished, the callback is called.
     if (type == "detailed") {
@@ -103,7 +103,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   function updateDisabledSidebarSteps(
     type: "summary" | "detailed",
     status: string,
-    setDisabledSidebarSteps: (updater: (prevSteps: string[]) => string[]) => void,
+    setDisabledSidebarSteps: (updater: (prevSteps: string[]) => string[]) => void
   ) {
     const sidebarKey = type === "summary" ? "summary_data" : "detailed_data";
 
@@ -129,7 +129,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
       })
       .catch((err) => {
         console.log(
-          "Oopsie, an error happened while fetching whether or not the user is paid.",
+          "Oopsie, an error happened while fetching whether or not the user is paid."
         );
       });
   }
@@ -189,10 +189,11 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
           setDetailedDataStatus,
         }}
       >
-        <TopBar burgerMenuFunction={toggleSidebar} />
+        <TopBar sidebarVisible={sidebarVisible} toggleSidebar={toggleSidebar} />
         <div className="flex flex-row p-2 gap-2 grow overflow-auto">
           <SideBar
             sidebarVisible={sidebarVisible}
+            toggleSidebar={toggleSidebar}
             disabledSidebarSteps={disabledSidebarSteps}
           />
           {/* Content */}

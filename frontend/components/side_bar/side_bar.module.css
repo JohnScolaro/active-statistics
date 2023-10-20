@@ -2,5 +2,10 @@
 /* I can't for the life of me figure out how to do this in regular tailwind. */
 
 .custom_sidebar {
-  height: calc(100vh - 5rem);
+  height: calc(100% - 5rem);
+}
+
+.custom_behind_sidebar {
+  height: calc(100% - 5rem);
+  width: calc(100% - 2rem);
 }
