@@ -21,6 +21,7 @@ from active_statistics.utils.local_storage import (
     we_have_detailed_activities_for_athlete,
     we_have_summary_activities_for_athlete,
 )
+from active_statistics.utils.routes import unauthorized_if_no_session_cookie
 from active_statistics.utils.sentry import set_up_sentry_for_server
 from flask import (
     Flask,
@@ -47,20 +48,6 @@ if evm.is_production():
 
 app = Flask(__name__)
 app.secret_key = evm.get_flask_secret_key()
-
-
-def get_strava_auth_url() -> str:
-    logger.info("getting auth url")
-    scheme = "https" if evm.is_production() else "http"
-    redirect_uri = (
-        f"{scheme}://{evm.get_domain()}:{str(evm.get_port())}/api/authenticate"
-    )
-
-    client = Client()
-    authorize_url: str = client.authorization_url(
-        client_id=evm.get_strava_client_id(), redirect_uri=redirect_uri
-    )
-    return authorize_url
 
 
 @app.route("/api/example_chart_data")
@@ -111,14 +98,12 @@ def authenticate() -> Response:
 
 
 @app.route("/api/refresh_summary_data")
+@unauthorized_if_no_session_cookie
 def refresh_summary_data() -> Response:
     """
     When this endpoint is hit, we will endevour to re-download the users summary data, assuming they haven't already
     refreshed in the last day.
     """
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
     athlete_id = int(session["athlete_id"])
     summary_refresh_min_period = dt.timedelta(days=1)
 
@@ -165,14 +150,12 @@ def refresh_summary_data() -> Response:
 
 
 @app.route("/api/refresh_detailed_data")
+@unauthorized_if_no_session_cookie
 def refresh_detailed_data() -> Response:
     """
     When this endpoint is hit, we will endevour to re-download the users detailed activity data, assuming they haven't
     already refreshed in the last day.
     """
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
     athlete_id = int(session["athlete_id"])
 
     # In case anyone decides to be smart and just manually ping this endpoint
@@ -228,15 +211,12 @@ def refresh_detailed_data() -> Response:
 
 
 @app.route("/api/summary_data_status")
+@unauthorized_if_no_session_cookie
 def summary_data_status() -> Response:
     """
     An endpoint that is constantly polled by the webserver for the status of the data until
     it eventually returns that data has been downloaded.
     """
-
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
     athlete_id = int(session["athlete_id"])
 
     # Firstly, if we are running in local mode, just check if there is data locally.
@@ -325,15 +305,12 @@ def summary_data_status() -> Response:
 
 
 @app.route("/api/detailed_data_status")
+@unauthorized_if_no_session_cookie
 def detailed_data_status() -> Response:
     """
     An endpoint that is constantly polled by the webserver for the status of the data until
     it eventually returns that data has been downloaded.
     """
-
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
     athlete_id = int(session["athlete_id"])
 
     # Firstly, if we are running in local mode, just check if there is data locally.
@@ -421,24 +398,9 @@ def detailed_data_status() -> Response:
         # Shouldn't get here.
 
 
-@app.route("/api/download_data")
-def download_data() -> Response:
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
-    return make_response(
-        render_template(
-            "download_data_main_content_container.html",
-            explanation="Welcome to Active Statistics! This tab is where you can refresh your plots with your latest data. There are two types of visualisation on this website. Visualisations that require 'detailed data' and visualisations that require summmary data. The summary and visualisation tabs are seperated on the left side with small horizontal lines. Summary data is automatically downloaded when you log in for the first time because it only takes a few seconds to download. If you wish to view visualisation that require detailed data, you'll have to manually click the 'refresh detailed data' button. Be prepared - this can take a while. It may take ~30 minutes if you have over 400 activities.",
-        )
-    )
-
-
 @app.route("/api/logout")
+@unauthorized_if_no_session_cookie
 def logout() -> Response:
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
     athlete_id = int(session["athlete_id"])
 
     redis.delete_strava_api_access_tokens(athlete_id)
@@ -447,17 +409,15 @@ def logout() -> Response:
     session.clear()
 
     # Redirect to index to reconnect with strava.
-    return redirect(url_for("index"))
+    return redirect("/")
 
 
 @app.route("/api/paid")
+@unauthorized_if_no_session_cookie
 def paid() -> Response:
     """
     Responds with whether this user is paid or not.
     """
-    if "athlete_id" not in session:
-        return redirect(url_for("index"))
-
     athlete_id = int(session["athlete_id"])
 
     # For now, nobody has paid. Unless you're running this locally, then you can have access to it.
@@ -481,6 +441,7 @@ class SideMenuTabs:
 
 
 @app.route("/api/tabs")
+@unauthorized_if_no_session_cookie
 def tabs_route() -> Response:
     def expand_tabs(tabs: list[Tab | TabGroup]) -> list[Any]:
         json_tabs = []

@@ -7,7 +7,9 @@ in the client because that's a requirement of plotly.
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CenteredSpinner } from "./spinner/spinner";
+import { wrappedFetch } from "@/lib/fetch";
 
 import dynamic from "next/dynamic";
 
@@ -23,19 +25,22 @@ export default function PlotContainer({ dataURL }: PlotComponentProps) {
   const [plotData, setPlotData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch data from the provided URL
-    fetch(dataURL)
-      .then((response) => response.json())
-      .then((data) => {
+    wrappedFetch(
+      dataURL,
+      (data) => {
         setPlotData(data);
         setIsLoading(false);
-      })
-      .catch((err) => {
+      },
+      (err) => {
         setError(err);
         setIsLoading(false);
-      });
+      },
+      router
+    );
   }, [dataURL]);
 
   if (isLoading) {

@@ -4,24 +4,29 @@ import { CenteredSpinner } from "@/components/spinner/spinner";
 import { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
 import Table from "./components/table/table";
+import { useRouter } from "next/navigation";
+import { wrappedFetch } from "@/lib/fetch";
 
 export default function Page({ params }: { params: { key: string } }) {
   const [loaded, setLoaded] = useState(false);
   const [data, setData] = useState({});
   const [error, setError] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const url = `/api/data/${params.key}`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
+    wrappedFetch(
+      url,
+      (data) => {
         setData(data);
         setLoaded(true);
-      })
-      .catch((err) => {
+      },
+      (err) => {
         setError(true);
         setLoaded(true);
-      });
+      },
+      router
+    );
   }, [params.key]);
 
   if (!loaded) {
