@@ -6,7 +6,16 @@ import { getCookie } from "cookies-next";
 import { useEffect, useState, useContext, createContext } from "react";
 import { CenteredSpinner } from "./spinner/spinner";
 
-const LoggedInContext = createContext(false);
+interface LoggedInContextInterface {
+  loggedIn: boolean;
+  setLoggedIn: (value: boolean) => void;
+}
+
+// Create the context and provide initial values
+const LoggedInContext = createContext<LoggedInContextInterface>({
+  loggedIn: false,
+  setLoggedIn: () => {},
+});
 
 export function useLoggedIn() {
   return useContext(LoggedInContext);
@@ -38,7 +47,7 @@ export default function Base({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <LoggedInContext.Provider value={loggedIn}>
+    <LoggedInContext.Provider value={{ loggedIn: loggedIn, setLoggedIn: setLoggedIn }}>
       <div className="flex flex-col bg-green-100 h-screen">{children}</div>
     </LoggedInContext.Provider>
   );

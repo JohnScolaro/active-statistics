@@ -3,6 +3,8 @@
 import { useContext } from "react";
 import { HomeContext } from "../layout";
 import { Spinner } from "@/components/spinner/spinner";
+import { useRouter } from "next/navigation";
+import { wrappedFetch } from "@/lib/fetch";
 
 export default function Page() {
   return (
@@ -59,6 +61,7 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
   const title = type == "detailed" ? "Download Detailed Data" : "Download Summary Data";
   const disable_and_blur = type == "detailed" && !homeContext.paidUser.paid;
   const message = dataStatus.message;
+  const router = useRouter();
 
   var statusContent: any = "";
   if (dataStatus.status == "finished") {
@@ -89,7 +92,7 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
     </div>
   );
 
-  function buttonClickFunction(type: "detailed" | "summary") {
+  function buttonClickFunction(type: "detailed" | "summary", router: any) {
     // If the button is clicked, we want to hit the 'refresh_data' endpoint and deal with it's response.
     // Then we want to set stopPolling to false and let the page start polling the status endpoint again.
     const url =
@@ -99,9 +102,9 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
         ? homeContext.setSummaryDataStatus
         : homeContext.setDetailedDataStatus;
 
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
+    wrappedFetch(
+      url,
+      (data) => {
         if (data.refresh_accepted) {
           updateFunction({
             message: "Attempting to refresh data.",
@@ -115,7 +118,12 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
             stopPolling: true,
           });
         }
-      });
+      },
+      () => {
+        console.log("Error while trying to refresh data.");
+      },
+      router
+    );
   }
 
   return (
@@ -133,7 +141,7 @@ function DownloadDataCard({ type }: { type: "summary" | "detailed" }) {
           <button
             className={`p-2 bg-green-400 rounded-lg ${disable_and_blur ? "z-0" : "z-20"}`}
             onClick={() => {
-              buttonClickFunction(type);
+              buttonClickFunction(type, router);
             }}
           >
             Refresh Data

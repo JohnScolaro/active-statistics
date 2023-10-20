@@ -3,13 +3,25 @@
 import Image from "next/image";
 import { useLoggedIn } from "@/components/base";
 import Link from "next/link";
+import { useEffect } from "react";
+import { getCookie } from "cookies-next";
 
 export default function StravaLoginButton() {
-  const logged_in = useLoggedIn();
+  const { loggedIn, setLoggedIn } = useLoggedIn();
+
+  // Since the `Base` component only renders initially and never changes, the
+  // cookies are never checked again. In the off chance that cookies are
+  // deleted mid session, we want this button to check for cookies again when
+  // it's displayed, because otherwise clicking it will bounce between /home
+  // and / as it get instantly redirected due to not being logged in.
+  useEffect(() => {
+    const isLoggedIn = getCookie("logged_in") == "true";
+    setLoggedIn(isLoggedIn);
+  });
 
   // If we have logged in, make this button navigate us to the /home page.
   // Otherwise it can take us to Strava.
-  if (logged_in) {
+  if (loggedIn) {
     return (
       <Link href="/home">
         <Image

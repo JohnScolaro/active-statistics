@@ -9,16 +9,9 @@ from active_statistics.utils.local_storage import (
     get_activity_iterator,
     get_summary_activity_iterator,
 )
+from active_statistics.utils.routes import unauthorized_if_no_session_cookie
 from active_statistics.utils.s3 import get_visualisation_data
-from flask import (
-    Flask,
-    jsonify,
-    make_response,
-    redirect,
-    render_template,
-    session,
-    url_for,
-)
+from flask import Flask, jsonify, make_response, redirect, session, url_for
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
 
@@ -48,10 +41,8 @@ class TableTab(Tab):
         self, app: Flask, evm: EnvironmentVariableManager
     ) -> None:
         def get_data_function(tab: TableTab):
+            @unauthorized_if_no_session_cookie
             def data_function() -> Response:
-                if "athlete_id" not in session:
-                    return redirect(url_for("index"))
-
                 athlete_id = int(session["athlete_id"])
 
                 if evm.use_s3():

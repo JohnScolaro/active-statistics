@@ -5,7 +5,8 @@ import { ExpandLess } from "@mui/icons-material";
 import { CenteredSpinner } from "../spinner/spinner";
 import Link from "next/link";
 import styles from "./side_bar.module.css";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { wrappedFetch } from "@/lib/fetch";
 
 interface SideBarProps {
   sidebarVisible: boolean;
@@ -47,12 +48,15 @@ interface SidebarButtonsProps {
 function SideBarButtons(props: SidebarButtonsProps) {
   // Sidebar data state
   const [menuData, setMenuData] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/tabs")
-      .then((response) => response.json())
-      .then((data) => setMenuData(data))
-      .catch((error) => console.error("Error fetching data:", error));
+    wrappedFetch(
+      "/api/tabs",
+      (data) => setMenuData(data),
+      (error) => console.error("Error fetching tabs: ", error),
+      router
+    );
   }, []);
 
   // Create the download_strava_data tab manually here.
