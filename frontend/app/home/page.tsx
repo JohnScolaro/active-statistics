@@ -1,8 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
-  router.push("/home/download_strava_data");
+
+  useEffect(() => {
+    router.push("/home/download_strava_data");
+  });
 }
