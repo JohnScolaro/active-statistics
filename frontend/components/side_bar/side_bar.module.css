@@ -9,3 +9,9 @@
   height: calc(100% - 5rem);
   width: calc(100% - 2rem);
 }
+
+@media (min-width: 1024px) {
+  .custom_sidebar {
+    height: calc(100%);
+  }
+}
