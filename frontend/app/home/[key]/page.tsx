@@ -44,7 +44,7 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
   if (data.type == "PlotTab") {
     return (
       <Plot
-        className="w-full h-full"
+        className="grow"
         data={data.chart_json.data}
         layout={data.chart_json.layout}
         config={{
@@ -60,7 +60,7 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
 
   if (data.type == "TriviaTab" || data.type == "TableTab") {
     return (
-      <div className="flex justify-center">
+      <div className="flex">
         <Table
           table_data={data.chart_json.table_data}
           show_headings={data.chart_json.show_headings}
