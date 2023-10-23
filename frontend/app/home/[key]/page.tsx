@@ -45,8 +45,8 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
     return (
       <Plot
         className="grow"
-        data={data.chart_json.data}
-        layout={data.chart_json.layout}
+        data={data.tab_data.data}
+        layout={data.tab_data.layout}
         config={{
           responsive: false,
           displayModeBar: false,
@@ -62,9 +62,9 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
     return (
       <div className="flex">
         <Table
-          table_data={data.chart_json.table_data}
-          show_headings={data.chart_json.show_headings}
-          column_info={data.chart_json.columns}
+          table_data={data.tab_data.table_data}
+          show_headings={data.tab_data.show_headings}
+          column_info={data.tab_data.columns}
         />
       </div>
     );

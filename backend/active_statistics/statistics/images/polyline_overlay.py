@@ -1,5 +1,6 @@
 import dataclasses
 import math
+import os
 from typing import Iterator
 
 import polyline
@@ -7,16 +8,66 @@ from PIL import Image
 from PIL import Image as img
 from PIL import ImageDraw
 from PIL.Image import Image
+from stravalib.model import Activity
 
 Polyline = list[tuple[float, float]]
 
 
+def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
+    compact_activities = [
+        CompactActivity(type=activity.type, polyline=activity.map.polyline)
+        for activity in activity_iterator
+    ]
+    activity_types = set(
+        compact_activity.type for compact_activity in compact_activities
+    )
+
+    for activity_type in activity_types:
+        image = create_image(
+            (
+                activity.polyline
+                for activity in compact_activities
+                if activity.type == activity_type
+            ),
+            1000,
+        )
+
+        if image is None:
+            continue
+
+        image.save(os.path.join(path, f"{activity_type}.png"), "PNG")
+        image.close()
+
+        gif_duration_ms = 3000
+        gif_fps = 20
+        images = create_gif_image(
+            [
+                activity.polyline
+                for activity in compact_activities
+                if activity.type == activity_type
+            ],
+            gif_duration_ms,
+            gif_fps,
+        )
+        images[0].save(
+            os.path.join(path, f"{activity_type}_animation.gif"),
+            save_all=True,
+            append_images=images[1:],
+            duration=gif_duration_ms / gif_fps,
+            loop=0,
+        )
+
+
 def create_image(
-    encoded_polylines: Iterator[str], max_segments_fraction: float = 1.0
+    encoded_polylines: Iterator[str | None],
+    image_size: int,
+    max_segments_fraction: float = 1.0,
 ) -> Image | None:
     """
     Creates and returns a PIL image object with all polylines overlaid and
     scaled correctly on top of eachother.
+
+    image_size: the width and height of the image in pixels.
 
     max_segments_fraction: This is a float between 0 and 1. At 0, nothing is
     plotted. At 0.5, the maximum number of segments allowed to be drawn is 0.5
@@ -39,7 +90,7 @@ def create_image(
         return None
 
     # Create a white canvas
-    width, height = 2000, 2000
+    width = height = image_size
     image = img.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
 
@@ -73,7 +124,10 @@ def create_image(
     return image
 
 
-def get_polyline_or_none(encoded_polyline: str) -> Polyline | None:
+def get_polyline_or_none(encoded_polyline: str | None) -> Polyline | None:
+    if encoded_polyline is None:
+        return None
+
     decoded_polyline = polyline.decode(encoded_polyline)
 
     if not decoded_polyline:
@@ -156,7 +210,7 @@ def create_gif_image(
     num_frames = int((gif_duration_ms / 1000) * gif_fps)
 
     return [
-        create_image(encoded_polylines, frame / num_frames)
+        create_image(encoded_polylines, 1000, frame / num_frames)
         for frame in range(1, num_frames + 1)
     ]
 
@@ -165,43 +219,5 @@ def create_gif_image(
 if __name__ == "__main__":
     from active_statistics.utils import local_storage
 
-    activity_iterator = local_storage.get_activity_iterator(94896104)
-    compact_activities = [
-        CompactActivity(type=activity.type, polyline=activity.map.polyline)
-        for activity in activity_iterator
-    ]
-    activity_types = set(
-        compact_activity.type for compact_activity in compact_activities
-    )
-
-    for activity_type in activity_types:
-        image = create_image(
-            activity.polyline
-            for activity in compact_activities
-            if activity.type == activity_type
-        )
-
-        if image is None:
-            continue
-
-        image.save(f"{activity_type}.png", "PNG")
-        image.close()
-
-        gif_duration_ms = 3000
-        gif_fps = 20
-        images = create_gif_image(
-            [
-                activity.polyline
-                for activity in compact_activities
-                if activity.type == activity_type
-            ],
-            gif_duration_ms,
-            gif_fps,
-        )
-        images[0].save(
-            f"{activity_type}_animation.gif",
-            save_all=True,
-            append_images=images[1:],
-            duration=gif_duration_ms / gif_fps,
-            loop=0,
-        )
+    activity_iterator = local_storage.get_summary_activity_iterator(94896104)
+    create_images(activity_iterator, "")

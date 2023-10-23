@@ -10,7 +10,7 @@ from active_statistics.utils.local_storage import (
     get_summary_activity_iterator,
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
-from active_statistics.utils.s3 import get_visualisation_data
+from active_statistics.utils.s3 import get_tab_data
 from flask import Flask, jsonify, make_response, redirect, session, url_for
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
@@ -46,7 +46,7 @@ class TableTab(Tab):
                 athlete_id = int(session["athlete_id"])
 
                 if evm.use_s3():
-                    table_data_str = get_visualisation_data(athlete_id, tab.get_key())
+                    table_data_str = get_tab_data(athlete_id, tab.get_key())
 
                     # If there is no data in S3 for this key, return a blank figure.
                     table_data: dict[Any, Any]
@@ -66,7 +66,7 @@ class TableTab(Tab):
                 # Add the key to the response so that the frontend knows which tab the data is for.
                 response_json = {
                     "key": tab.get_key(),
-                    "chart_json": table_data,
+                    "tab_data": table_data,
                     "type": self.__class__.__name__,
                 }
 

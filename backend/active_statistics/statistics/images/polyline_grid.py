@@ -1,6 +1,7 @@
 import dataclasses
 import datetime as dt
 import math
+import os
 from typing import Iterator
 
 import polyline
@@ -8,14 +9,75 @@ from PIL import Image
 from PIL import Image as img
 from PIL import ImageDraw
 from PIL.Image import Image
+from stravalib.model import Activity
 
 Polyline = list[tuple[float, float]]
+
+
+def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
+    compact_activities = [
+        CompactActivity(
+            type=activity.type,
+            polyline=activity.map.polyline,
+            start_date_local=activity.start_date_local,
+        )
+        for activity in activity_iterator
+    ]
+    compact_activities.sort(key=lambda x: x.start_date_local)
+
+    activity_types = set(
+        compact_activity.type for compact_activity in compact_activities
+    )
+
+    PROPOSED_IMAGE_SIZE = 1200
+    BORDER_SIZE_PX = 6
+    LINE_THICKNESS = 1
+
+    for activity_type in activity_types:
+        image = create_image(
+            (
+                activity.polyline
+                for activity in compact_activities
+                if activity.type == activity_type
+            ),
+            1.0,
+            PROPOSED_IMAGE_SIZE,
+            BORDER_SIZE_PX,
+            LINE_THICKNESS,
+        )
+
+        if image is None:
+            continue
+
+        image.save(os.path.join(path, f"{activity_type}_grid.png"), "PNG")
+        image.close()
+
+        gif_duration_ms = 2000
+        gif_fps = 40
+        images = create_gif_image(
+            [
+                activity.polyline
+                for activity in compact_activities
+                if activity.type == activity_type
+            ],
+            gif_duration_ms,
+            gif_fps,
+            PROPOSED_IMAGE_SIZE,
+            BORDER_SIZE_PX,
+            LINE_THICKNESS,
+        )
+        images[0].save(
+            os.path.join(path, f"{activity_type}_grid_animation.gif"),
+            save_all=True,
+            append_images=images[1:],
+            duration=gif_duration_ms / gif_fps,
+            loop=0,
+        )
 
 
 def create_image(
     encoded_polylines: Iterator[str],
     polyline_fraction: float = 1.0,
-    normalise_activity_time: bool = True,
     proposed_image_size: int = 2000,
     border_size_px: int = 1,
     line_thickness: int = 2,
@@ -25,13 +87,7 @@ def create_image(
 
     max_segments_fraction: This is a float between 0 and 1.
         * At 0, nothing is plotted.
-        * At 0.5, different things are plotted depending on the value of 'normalise activity time'.
-            * If normalise activity time is True, then half of every polyline is plotted.
-            * If normalise activity time is False, then every polyline will have
-                plotted 50% of the polyline segments of the longest polyline.
-        This facilitates the creation of animations.
-
-    normalise_activity_time: See above.
+        * At 0.5, half the polyline is plotted.
 
     proposed_image_size: The height and width of the created image in pixels.
         The final image size will very slightly from this, but hopefully not
@@ -185,12 +241,23 @@ class CompactActivity:
 
 
 def create_gif_image(
-    encoded_polylines: list[str], gif_duration_ms: int, gif_fps: int
+    encoded_polylines: list[str],
+    gif_duration_ms: int,
+    gif_fps: int,
+    proposed_image_size: int = 2000,
+    border_size_px: int = 1,
+    line_thickness: int = 2,
 ) -> list[Image]:
     num_frames = int((gif_duration_ms / 1000) * gif_fps)
 
     return [
-        create_image(encoded_polylines, frame / num_frames)
+        create_image(
+            encoded_polylines,
+            frame / num_frames,
+            proposed_image_size=proposed_image_size,
+            border_size_px=border_size_px,
+            line_thickness=line_thickness,
+        )
         for frame in range(1, num_frames + 1)
     ]
 
@@ -199,56 +266,5 @@ def create_gif_image(
 if __name__ == "__main__":
     from active_statistics.utils import local_storage
 
-    activity_iterator = local_storage.get_activity_iterator(94896104)
-    compact_activities = [
-        CompactActivity(
-            type=activity.type,
-            polyline=activity.map.polyline,
-            start_date_local=activity.start_date_local,
-        )
-        for activity in activity_iterator
-    ]
-    compact_activities.sort(key=lambda x: x.start_date_local)
-
-    activity_types = set(
-        compact_activity.type for compact_activity in compact_activities
-    )
-
-    for activity_type in activity_types:
-        image = create_image(
-            (
-                activity.polyline
-                for activity in compact_activities
-                if activity.type == activity_type
-            ),
-            1.0,
-            True,
-            2000,
-            10,
-            2,
-        )
-
-        if image is None:
-            continue
-
-        image.save(f"{activity_type}_grid.png", "PNG")
-        image.close()
-
-        gif_duration_ms = 2000
-        gif_fps = 40
-        images = create_gif_image(
-            [
-                activity.polyline
-                for activity in compact_activities
-                if activity.type == activity_type
-            ],
-            gif_duration_ms,
-            gif_fps,
-        )
-        images[0].save(
-            f"{activity_type}_grid_animation.gif",
-            save_all=True,
-            append_images=images[1:],
-            duration=gif_duration_ms / gif_fps,
-            loop=0,
-        )
+    activity_iterator = local_storage.get_summary_activity_iterator(94896104)
+    create_images(activity_iterator, "")

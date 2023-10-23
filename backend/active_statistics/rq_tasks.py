@@ -1,6 +1,8 @@
 import datetime as dt
 import json
 import logging
+import os
+import shutil
 import time
 from typing import Iterator, Optional, Type
 
@@ -8,6 +10,7 @@ import plotly.graph_objects as go
 import sentry_sdk
 from active_statistics.app_logging import TASK, setup_task_logging
 from active_statistics.gui.gui import all_tabs
+from active_statistics.gui.image_tab import ImageTab
 from active_statistics.gui.plot_tabs import PlotTab
 from active_statistics.gui.tab_group import TabGroup
 from active_statistics.gui.tabs import Tab
@@ -22,7 +25,7 @@ from active_statistics.utils.local_storage import (
     save_activity_to_file,
     save_summary_activities_to_file,
 )
-from active_statistics.utils.s3 import save_plot_data
+from active_statistics.utils.s3 import save_tab_data, save_tab_images
 from plotly.utils import PlotlyJSONEncoder
 from rq.job import Job, get_current_job
 from stravalib.client import Client
@@ -178,6 +181,7 @@ def process_activities(athlete_id: int, detailed: bool) -> None:
         return flattened_tabs
 
     for tab in flatten(all_tabs):
+        a = 1
         if tab.is_detailed() == detailed:
             try:
                 activity_iterator: Iterator[Activity] = (
@@ -193,11 +197,29 @@ def process_activities(athlete_id: int, detailed: bool) -> None:
                 if isinstance(tab, PlotTab):
                     fig: go.Figure = tab.plot_function(activity_iterator)
                     json_data = json.dumps(fig, cls=PlotlyJSONEncoder)
-                if isinstance(tab, TableTab):
+                    save_tab_data(athlete_id, tab.get_key(), json_data)
+                elif isinstance(tab, TableTab):
                     data = tab.get_table_data(activity_iterator)
                     json_data = json.dumps(data, cls=PlotlyJSONEncoder)
-
-                save_plot_data(athlete_id, tab.get_key(), json_data)
+                    save_tab_data(athlete_id, tab.get_key(), json_data)
+                elif isinstance(tab, ImageTab):
+                    # Create a directory:
+                    path = "tmp_image_dir"
+                    os.makedirs(path)
+                    try:
+                        # Make the images
+                        tab.create_images_function(activity_iterator, path)
+                        # Add the images to an S3 bucket.
+                        files = os.listdir(path)
+                        save_tab_images(athlete_id, tab.get_key(), files)
+                        # Delete the files and directory.
+                        shutil.rmtree(path)
+                    except Exception as e:
+                        # Ensure that if there is an error, the tmp file gets removed anyway.
+                        shutil.rmtree(path)
+                        raise e
+                else:
+                    raise Exception("Tab isn't a known type of tab.")
 
             except Exception as e:
                 # If we get an exception in the data generation, just throw it into Sentry, but soldier on.
