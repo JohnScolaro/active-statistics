@@ -177,7 +177,7 @@ const SideBarMultiLevelButton = ({
         }`}
         onClick={handleClick}
       >
-        <SideBarButtonText text={item.name} indentation={0} />
+        <SideBarButtonText text={item.name} indentation={indentation} />
         <ExpandLess style={iconStyle} />
       </div>
       <Collapse in={open} timeout="auto" unmountOnExit>
