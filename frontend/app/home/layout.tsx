@@ -270,7 +270,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
             disabledSidebarSteps={disabledSidebarSteps}
           />
           {/* Content */}
-          <div className="bg-white rounded-lg p-2 h-full overflow-auto grow">
+          <div className="flex bg-white rounded-lg p-2 overflow-auto grow justify-center">
             {children}
           </div>
         </div>
