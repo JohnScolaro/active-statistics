@@ -12,6 +12,7 @@ requires = [
     "redis==5.0.0",
     "gunicorn==21.2.0",
     "polyline==2.0.1",
+    "Pillow==10.1.0",
 ]
 
 dev_requires = [
