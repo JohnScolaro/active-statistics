@@ -11,6 +11,7 @@ requires = [
     "plotly-calplot==0.1.16",
     "redis==5.0.0",
     "gunicorn==21.2.0",
+    "polyline==2.0.1",
 ]
 
 dev_requires = [
