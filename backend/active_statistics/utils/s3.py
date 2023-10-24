@@ -58,7 +58,7 @@ def get_pre_signed_urls_for_tab_images(athlete_id: int, tab_key: str) -> dict[st
     except:
         raise Exception("Something went wrong while trying to list images.")
 
-    presigned_urls: list[str] = {}
+    presigned_urls: dict[str, str] = {}
     # Generate pre-signed URLs for each image
     for obj in objects.get("Contents", []):
         object_key = obj["Key"]
@@ -86,7 +86,8 @@ def get_captions_for_tab_images(athlete_id: int, tab_key: str) -> dict[str, str]
         Key=f"{athlete_id}/{tab_key}/captions.json",
     )
     chart_json = response["Body"].read()
-    return json.loads(chart_json.decode("utf-8"))
+    captions: dict[str, str] = json.loads(chart_json.decode("utf-8"))
+    return captions
 
 
 def is_there_any_data_for_athlete(athlete_id: int) -> bool:

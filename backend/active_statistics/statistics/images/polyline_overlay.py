@@ -5,7 +5,6 @@ import os
 from typing import Iterator
 
 import polyline
-from PIL import Image
 from PIL import Image as img
 from PIL import ImageDraw
 from PIL.Image import Image
@@ -94,12 +93,12 @@ def create_image(
     * the total number of segments in the polyline with the maximimum number
     of segments. This facilitates the creation of animations.
     """
-    polylines = []
-    for polyline in encoded_polylines:
+    polylines: list[Polyline] = []
+    for encoded_polyline in encoded_polylines:
         # If the polyline has nothing in it, just return.
-        polyline = get_polyline_or_none(polyline)
+        polyline = decode_polyline(encoded_polyline)
 
-        if polyline is None:
+        if len(polyline) == 0:
             continue
 
         polyline = apply_equirectangular_approximation(polyline)
@@ -144,15 +143,11 @@ def create_image(
     return image
 
 
-def get_polyline_or_none(encoded_polyline: str | None) -> Polyline | None:
+def decode_polyline(encoded_polyline: str | None) -> Polyline:
     if encoded_polyline is None:
-        return None
+        return []
 
-    decoded_polyline = polyline.decode(encoded_polyline)
-
-    if not decoded_polyline:
-        return None
-
+    decoded_polyline: Polyline = polyline.decode(encoded_polyline)
     return decoded_polyline
 
 
@@ -177,7 +172,7 @@ def transform_to_start_and_end_at_zero(polyline: Polyline) -> Polyline:
     return [(x - polyline[0][0], y - polyline[0][1]) for (x, y) in polyline]
 
 
-def max_chebychev_distance(polyline: polyline) -> float:
+def max_chebychev_distance(polyline: Polyline) -> float:
     max_x = max(abs(point[0]) for point in polyline)
     max_y = max(abs(point[1]) for point in polyline)
     return max([max_x, max_y])
@@ -229,10 +224,15 @@ def create_gif_image(
 ) -> list[Image]:
     num_frames = int((gif_duration_ms / 1000) * gif_fps)
 
-    return [
-        create_image(encoded_polylines, 1000, frame / num_frames)
-        for frame in range(1, num_frames + 1)
-    ]
+    return list(
+        filter(
+            (lambda x: x is not None),  # type: ignore
+            (
+                create_image((_ for _ in encoded_polylines), 1000, frame / num_frames)
+                for frame in range(1, num_frames + 1)
+            ),
+        )
+    )
 
 
 # For testing

@@ -31,6 +31,7 @@ types_requires = [
     "types-requests==2.31.0.6",
     "pandas-stubs==2.0.3.230814",
     "types-setuptools==68.1.0.1",
+    "types-Pillow==10.1.0.0",
 ]
 
 setup(

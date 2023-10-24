@@ -250,7 +250,7 @@ def log(log_fuction, message: str) -> None:
         job.save()
 
 
-def get_all_tabs() -> list[Tab]:
+def get_all_tabs() -> list[Tab | TabGroup]:
     """
     Returns all tabs. Exists as it's own function so I can mock it in tests.
     """

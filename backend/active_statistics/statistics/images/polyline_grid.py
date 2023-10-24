@@ -3,10 +3,9 @@ import datetime as dt
 import json
 import math
 import os
-from typing import Iterator
+from typing import Iterable
 
-import polyline
-from PIL import Image
+import polyline as pl
 from PIL import Image as img
 from PIL import ImageDraw
 from PIL.Image import Image
@@ -15,7 +14,7 @@ from stravalib.model import Activity
 Polyline = list[tuple[float, float]]
 
 
-def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
+def create_images(activity_iterator: Iterable[Activity], path: str) -> None:
     captions: dict[str, str] = {}
 
     compact_activities = [
@@ -25,6 +24,7 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
             start_date_local=activity.start_date_local,
         )
         for activity in activity_iterator
+        if activity.start_date_local is not None
     ]
     compact_activities.sort(key=lambda x: x.start_date_local)
 
@@ -92,7 +92,7 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
 
 
 def create_image(
-    encoded_polylines: Iterator[str],
+    encoded_polylines: Iterable[str],
     polyline_fraction: float = 1.0,
     proposed_image_size: int = 2000,
     border_size_px: int = 1,
@@ -114,12 +114,12 @@ def create_image(
 
     line_thickness: The thickness of the line which draws the routes in px.
     """
-    polylines = []
-    for polyline in encoded_polylines:
-        # If the polyline has nothing in it, just return.
-        polyline = get_polyline_or_none(polyline)
+    polylines: list[Polyline] = []
+    for encoded_polyline in encoded_polylines:
+        polyline: Polyline = pl.decode(encoded_polyline)
 
-        if polyline is None:
+        # If the polyline has nothing in it, just return.
+        if not polyline:
             continue
 
         polyline = apply_equirectangular_approximation(polyline)
@@ -169,15 +169,6 @@ def create_image(
         )
 
     return image
-
-
-def get_polyline_or_none(encoded_polyline: str) -> Polyline | None:
-    decoded_polyline = polyline.decode(encoded_polyline)
-
-    if not decoded_polyline:
-        return None
-
-    return decoded_polyline
 
 
 def apply_equirectangular_approximation(polyline: Polyline) -> Polyline:
@@ -249,7 +240,7 @@ def translate_polyline(polyline: Polyline, min_canvas_dimension: int) -> Polylin
 class CompactActivity:
     type: str
     summary_polyline: str
-    start_date_local: dt.datetime | None
+    start_date_local: dt.datetime
 
 
 def create_gif_image(
@@ -262,16 +253,21 @@ def create_gif_image(
 ) -> list[Image]:
     num_frames = int((gif_duration_ms / 1000) * gif_fps)
 
-    return [
-        create_image(
-            encoded_polylines,
-            frame / num_frames,
-            proposed_image_size=proposed_image_size,
-            border_size_px=border_size_px,
-            line_thickness=line_thickness,
+    return list(
+        filter(
+            lambda x: x is not None,  # type: ignore
+            (
+                create_image(
+                    encoded_polylines,
+                    frame / num_frames,
+                    proposed_image_size=proposed_image_size,
+                    border_size_px=border_size_px,
+                    line_thickness=line_thickness,
+                )
+                for frame in range(1, num_frames + 1)
+            ),
         )
-        for frame in range(1, num_frames + 1)
-    ]
+    )
 
 
 # For testing

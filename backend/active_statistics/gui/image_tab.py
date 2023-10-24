@@ -31,8 +31,8 @@ class ImageTab(Tab):
     def get_plot_endpoint(self) -> str:
         return f"/api/data/{self.get_key()}"
 
-    def get_plot_function(self) -> Callable[[Iterator[Activity]], list[Image]]:
-        return self.plot_function
+    def get_plot_function(self) -> Callable[[Iterator[Activity], str], None]:
+        return self.create_images_function
 
     def generate_and_register_routes(
         self, app: Flask, evm: EnvironmentVariableManager
@@ -42,6 +42,8 @@ class ImageTab(Tab):
             def plot_function() -> Response:
                 athlete_id = int(session["athlete_id"])
 
+                response_data: dict[str, list[str]] = defaultdict(list)
+
                 if evm.use_s3():
                     tab_images = get_pre_signed_urls_for_tab_images(
                         athlete_id, tab.get_key()
@@ -49,14 +51,10 @@ class ImageTab(Tab):
                     tab_captions = get_captions_for_tab_images(
                         athlete_id, tab.get_key()
                     )
-                    response_data = defaultdict(list)
                     for k, v in tab_images.items():
                         response_data[k].append(v)
                     for k, v in tab_captions.items():
                         response_data[k].append(v)
-
-                else:
-                    response_data = {}
 
                 # Add the key to the response so that the frontend knows which tab the data is for.
                 response_json = {
