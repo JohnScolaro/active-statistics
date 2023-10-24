@@ -50,9 +50,8 @@ def get_and_process_summary_statistics(athlete_id: int) -> None:
     )
     save_summary_activities_to_file(athlete_id, summary_activities)
 
-    if evm.use_s3():
-        process_activities(athlete_id, detailed=False)
-        delete_athlete_storage_location(athlete_id)
+    process_activities(athlete_id, detailed=False)
+    delete_athlete_storage_location(athlete_id)
 
 
 def get_and_process_detailed_statistics(athlete_id: int) -> None:
@@ -67,9 +66,9 @@ def get_and_process_detailed_statistics(athlete_id: int) -> None:
     get_and_save_detailed_activities(
         client, athlete_id, list(activity.id for activity in summary_activities)
     )
-    if evm.use_s3():
-        process_activities(athlete_id, detailed=True)
-        delete_athlete_storage_location(athlete_id)
+
+    process_activities(athlete_id, detailed=True)
+    delete_athlete_storage_location(athlete_id)
 
 
 def get_and_save_detailed_activities(
@@ -180,8 +179,7 @@ def process_activities(athlete_id: int, detailed: bool) -> None:
                 flattened_tabs.append(tab)
         return flattened_tabs
 
-    for tab in flatten(all_tabs):
-        a = 1
+    for tab in flatten(get_all_tabs()):
         if tab.is_detailed() == detailed:
             try:
                 activity_iterator: Iterator[Activity] = (
@@ -197,23 +195,31 @@ def process_activities(athlete_id: int, detailed: bool) -> None:
                 if isinstance(tab, PlotTab):
                     fig: go.Figure = tab.plot_function(activity_iterator)
                     json_data = json.dumps(fig, cls=PlotlyJSONEncoder)
-                    save_tab_data(athlete_id, tab.get_key(), json_data)
+                    if evm.use_s3():
+                        save_tab_data(athlete_id, tab.get_key(), json_data)
                 elif isinstance(tab, TableTab):
                     data = tab.get_table_data(activity_iterator)
                     json_data = json.dumps(data, cls=PlotlyJSONEncoder)
-                    save_tab_data(athlete_id, tab.get_key(), json_data)
+                    if evm.use_s3():
+                        save_tab_data(athlete_id, tab.get_key(), json_data)
                 elif isinstance(tab, ImageTab):
                     # Create a directory:
-                    path = "tmp_image_dir"
-                    os.makedirs(path)
+                    path = os.path.join("tmp_image_dir", tab.get_key())
+                    if not os.path.exists(path):
+                        os.makedirs(path)
                     try:
                         # Make the images
                         tab.create_images_function(activity_iterator, path)
                         # Add the images to an S3 bucket.
                         files = os.listdir(path)
-                        save_tab_images(athlete_id, tab.get_key(), files)
-                        # Delete the files and directory.
-                        shutil.rmtree(path)
+                        if evm.use_s3():
+                            save_tab_images(
+                                athlete_id,
+                                tab.get_key(),
+                                [os.path.join(path, file) for file in files],
+                            )
+                            # Delete the files and directory.
+                            shutil.rmtree(path)
                     except Exception as e:
                         # Ensure that if there is an error, the tmp file gets removed anyway.
                         shutil.rmtree(path)
@@ -242,3 +248,10 @@ def log(log_fuction, message: str) -> None:
     if isinstance(job, Job):
         job.meta["message"] = message
         job.save()
+
+
+def get_all_tabs() -> list[Tab]:
+    """
+    Returns all tabs. Exists as it's own function so I can mock it in tests.
+    """
+    return all_tabs

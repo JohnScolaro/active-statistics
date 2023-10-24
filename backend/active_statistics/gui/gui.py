@@ -105,6 +105,24 @@ all_tabs: list[Tab | TabGroup] = [
                     ),
                 ],
             ),
+            TabGroup(
+                name="Images",
+                key="summary_images",
+                children=[
+                    ImageTab(
+                        name="Polyline Overlay",
+                        detailed=False,
+                        description="yeet",
+                        create_images_function=polyline_overlay.create_images,
+                    ),
+                    ImageTab(
+                        name="Polyline Grid",
+                        detailed=False,
+                        description="yeet",
+                        create_images_function=polyline_grid.create_images,
+                    ),
+                ],
+            ),
         ],
     ),
     TabGroup(
@@ -134,24 +152,6 @@ all_tabs: list[Tab | TabGroup] = [
                 detailed=True,
                 description="Some more in-depth trivia about your Strava activities, which requires downloading your detailed activities to see.",
                 trivia_processor=detailed_trivia_processor,
-            ),
-            TabGroup(
-                name="Images",
-                key="summary_images",
-                children=[
-                    ImageTab(
-                        name="Polyline Overlay",
-                        detailed=True,
-                        description="yeet",
-                        create_images_function=polyline_overlay.create_images,
-                    ),
-                    ImageTab(
-                        name="Polyline Grid",
-                        detailed=True,
-                        description="yeet",
-                        create_images_function=polyline_grid.create_images,
-                    ),
-                ],
             ),
         ],
     ),

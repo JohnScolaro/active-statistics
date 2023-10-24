@@ -1,5 +1,6 @@
 import dataclasses
 import datetime as dt
+import json
 import math
 import os
 from typing import Iterator
@@ -15,10 +16,12 @@ Polyline = list[tuple[float, float]]
 
 
 def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
+    captions: dict[str, str] = {}
+
     compact_activities = [
         CompactActivity(
             type=activity.type,
-            polyline=activity.map.polyline,
+            summary_polyline=activity.map.summary_polyline,
             start_date_local=activity.start_date_local,
         )
         for activity in activity_iterator
@@ -36,7 +39,7 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
     for activity_type in activity_types:
         image = create_image(
             (
-                activity.polyline
+                activity.summary_polyline
                 for activity in compact_activities
                 if activity.type == activity_type
             ),
@@ -49,14 +52,18 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
         if image is None:
             continue
 
-        image.save(os.path.join(path, f"{activity_type}_grid.png"), "PNG")
+        image_name = f"{activity_type}_grid.png"
+        image_path = os.path.join(path, image_name)
+        image.save(image_path, "PNG")
         image.close()
+
+        captions[image_name] = f"A grid of all {activity_type} activities."
 
         gif_duration_ms = 2000
         gif_fps = 40
         images = create_gif_image(
             [
-                activity.polyline
+                activity.summary_polyline
                 for activity in compact_activities
                 if activity.type == activity_type
             ],
@@ -66,13 +73,22 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
             BORDER_SIZE_PX,
             LINE_THICKNESS,
         )
+        gif_name = f"{activity_type}_grid_animation.gif"
+        gif_path = os.path.join(path, gif_name)
         images[0].save(
-            os.path.join(path, f"{activity_type}_grid_animation.gif"),
+            gif_path,
             save_all=True,
             append_images=images[1:],
             duration=gif_duration_ms / gif_fps,
             loop=0,
         )
+
+        captions[gif_name] = f"An animation of all {activity_type} activities."
+
+    # Create captions
+    # Dump the dictionary to a JSON file
+    with open(os.path.join(path, "captions.json"), "w") as json_file:
+        json.dump(captions, json_file)
 
 
 def create_image(
@@ -207,10 +223,6 @@ def custom_scale_polyline(polyline: Polyline) -> Polyline:
 
     translated_polyline = [(x - min_x, y - min_y) for (x, y) in polyline]
 
-    # Calculate the translation offsets to move the scaled polyline to the center of the unit square
-    # translate_x = -min_x * scaling_factor + (1 - width * scaling_factor) / 2
-    # translate_y = -min_y * scaling_factor + (1 - height * scaling_factor) / 2
-
     # Apply the scaling and translation to each point in the polyline
     scaled_polyline = [
         (
@@ -236,7 +248,7 @@ def translate_polyline(polyline: Polyline, min_canvas_dimension: int) -> Polylin
 @dataclasses.dataclass
 class CompactActivity:
     type: str
-    polyline: str
+    summary_polyline: str
     start_date_local: dt.datetime | None
 
 

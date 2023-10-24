@@ -1,4 +1,5 @@
 import dataclasses
+import json
 import math
 import os
 from typing import Iterator
@@ -14,8 +15,12 @@ Polyline = list[tuple[float, float]]
 
 
 def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
+    captions: dict[str, str] = {}
+
     compact_activities = [
-        CompactActivity(type=activity.type, polyline=activity.map.polyline)
+        CompactActivity(
+            type=activity.type, summary_polyline=activity.map.summary_polyline
+        )
         for activity in activity_iterator
     ]
     activity_types = set(
@@ -25,7 +30,7 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
     for activity_type in activity_types:
         image = create_image(
             (
-                activity.polyline
+                activity.summary_polyline
                 for activity in compact_activities
                 if activity.type == activity_type
             ),
@@ -35,27 +40,42 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
         if image is None:
             continue
 
-        image.save(os.path.join(path, f"{activity_type}.png"), "PNG")
+        image_name = f"{activity_type}.png"
+        image_path = os.path.join(path, image_name)
+        image.save(image_path, "PNG")
         image.close()
+
+        captions[
+            image_name
+        ] = f"All {activity_type} activities overlaid as if they have the same starting point."
 
         gif_duration_ms = 3000
         gif_fps = 20
         images = create_gif_image(
             [
-                activity.polyline
+                activity.summary_polyline
                 for activity in compact_activities
                 if activity.type == activity_type
             ],
             gif_duration_ms,
             gif_fps,
         )
+
+        gif_name = f"{activity_type}_animation.gif"
+        gif_path = os.path.join(path, gif_name)
         images[0].save(
-            os.path.join(path, f"{activity_type}_animation.gif"),
+            gif_path,
             save_all=True,
             append_images=images[1:],
             duration=gif_duration_ms / gif_fps,
             loop=0,
         )
+        captions[gif_name] = f"An animation of overlaid {activity_type} activities."
+
+        # Create captions
+        # Dump the dictionary to a JSON file
+        with open(os.path.join(path, "captions.json"), "w") as json_file:
+            json.dump(captions, json_file)
 
 
 def create_image(
@@ -201,7 +221,7 @@ def translate_polyline(polyline: Polyline, min_canvas_dimension: int) -> Polylin
 @dataclasses.dataclass
 class CompactActivity:
     type: str
-    polyline: str
+    summary_polyline: str
 
 
 def create_gif_image(

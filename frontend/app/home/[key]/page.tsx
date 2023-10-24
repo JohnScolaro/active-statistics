@@ -6,6 +6,7 @@ import Plot from "react-plotly.js";
 import Table from "./components/table/table";
 import { useRouter } from "next/navigation";
 import { wrappedFetch } from "@/lib/fetch";
+import ImagePage from "./components/image/image";
 
 export default function Page({ params }: { params: { key: string } }) {
   const [loaded, setLoaded] = useState(false);
@@ -68,6 +69,10 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
         />
       </div>
     );
+  }
+
+  if (data.type == "ImageTab") {
+    return <ImagePage data={data.tab_data}></ImagePage>;
   }
 
   return (
