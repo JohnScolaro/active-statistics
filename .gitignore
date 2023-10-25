@@ -6,3 +6,4 @@ __pycache__
 tmp_storage
 *.egg-info
 build
+tmp_image_dir

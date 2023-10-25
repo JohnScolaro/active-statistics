@@ -23,11 +23,13 @@ def test_first_activities_have_no_average_speeds() -> None:
             start_date_local=dt.datetime(2015, 1, 1, 6),
             average_speed=Quantity(0.0, "m/s"),
             moving_time=0,
+            flagged=False,
         ),
         ActivityFactory(
             type="Run",
             start_date_local=dt.datetime(2020, 1, 1, 6),
             average_speed=Quantity(10, "m/s"),
+            flagged=False,
         ),
     ]
     plot(_ for _ in activities)

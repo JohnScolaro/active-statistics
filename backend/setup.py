@@ -11,6 +11,8 @@ requires = [
     "plotly-calplot==0.1.16",
     "redis==5.0.0",
     "gunicorn==21.2.0",
+    "polyline==2.0.1",
+    "Pillow==10.1.0",
 ]
 
 dev_requires = [
@@ -31,6 +33,7 @@ types_requires = [
     "types-requests==2.31.0.6",
     "pandas-stubs==2.0.3.230814",
     "types-setuptools==68.1.0.1",
+    "types-Pillow==10.1.0.0",
 ]
 
 setup(
