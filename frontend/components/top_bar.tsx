@@ -9,7 +9,7 @@ interface TopBarProps {
 
 export default function TopBar({ sidebarVisible, toggleSidebar }: TopBarProps) {
   return (
-    <div className="bg-green-600 flex justify-between p-2 mt-2 ml-2 mr-2 rounded-lg h-14">
+    <div className="bg-green-600 flex justify-between p-2 mt-2 ml-2 mr-2 rounded-lg h-14 max-h-14">
       <div className="lg:hidden">
         <BurgerMenuIcon isBurgerIcon={!sidebarVisible} toggleIcon={toggleSidebar} />
       </div>
