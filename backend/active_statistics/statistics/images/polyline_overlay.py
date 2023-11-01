@@ -98,7 +98,11 @@ def create_image(
         # If the polyline has nothing in it, just return.
         polyline = decode_polyline(encoded_polyline)
 
-        if len(polyline) == 0:
+        if len(polyline) <= 1:
+            # I think we have ran into instances where people have ONLY activities with a single
+            # lat-long pair here, which means that the max cheby distance is 0, and then we do a
+            # divide by zero. So lets just continue if there is a single point, because lets be
+            # real, a single point is silly to plot.
             continue
 
         polyline = apply_equirectangular_approximation(polyline)
@@ -116,6 +120,13 @@ def create_image(
     max_all_max_chebychev_distances = max(
         max_chebychev_distance(polyline) for polyline in polylines
     )
+
+    if max_all_max_chebychev_distances == 0:
+        # This can occur if a polyline is any number of points all at the exact
+        # same location, and that polyline if the only polyline that that
+        # activity (or possible all polylines for that activity have identical
+        # points.)  We just want to return if that's the case.
+        return None
 
     scaled_polylines = [
         aesthetically_scale_polyline(
