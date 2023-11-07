@@ -25,6 +25,7 @@ def create_images(activity_iterator: Iterable[Activity], path: str) -> None:
         )
         for activity in activity_iterator
         if activity.start_date_local is not None
+        and activity.map.summary_polyline is not None
     ]
     compact_activities.sort(key=lambda x: x.start_date_local)
 
@@ -118,13 +119,18 @@ def create_image(
     for encoded_polyline in encoded_polylines:
         polyline: Polyline = pl.decode(encoded_polyline)
 
-        # If the polyline has nothing in it, just return.
-        if not polyline:
+        if len(polyline) <= 1:
+            # I think we have ran into instances where people have ONLY activities with a single
+            # lat-long pair here, which means that the max cheby distance is 0, and then we do a
+            # divide by zero. So lets just continue if there is a single point, because lets be
+            # real, a single point is silly to plot.
             continue
 
         polyline = apply_equirectangular_approximation(polyline)
-        polyline = custom_scale_polyline(polyline)
-        polylines.append(polyline)
+        optional_polyline = custom_scale_polyline(polyline)
+
+        if optional_polyline is not None:
+            polylines.append(optional_polyline)
 
     if not polylines:
         return None
@@ -188,7 +194,7 @@ def apply_equirectangular_approximation(polyline: Polyline) -> Polyline:
     return polyline
 
 
-def custom_scale_polyline(polyline: Polyline) -> Polyline:
+def custom_scale_polyline(polyline: Polyline) -> None | Polyline:
     """
     The goal here is to scale some arbitrary polyline into the center of a unit
     square. This will make it easier to place them all in the future.
@@ -205,6 +211,11 @@ def custom_scale_polyline(polyline: Polyline) -> Polyline:
     # Calculate the dimensions of the bounding box
     width = max_x - min_x
     height = max_y - min_y
+
+    # Handle the case where all points are in the same spot. To avoid a div/0
+    # error here, just return None because we can't scale this.
+    if max([height, width]) == 0:
+        return None
 
     # Calculate the scaling factors for x and y to fit the polyline into a unit square
     if width > height:
