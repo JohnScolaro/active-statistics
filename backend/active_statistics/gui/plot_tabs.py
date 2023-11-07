@@ -11,7 +11,7 @@ from active_statistics.utils.local_storage import (
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
 from active_statistics.utils.s3 import get_tab_data
-from flask import Flask, jsonify, make_response, redirect, session, url_for
+from flask import Flask, jsonify, make_response, session
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
 
