@@ -42,23 +42,50 @@ class ImageTab(Tab):
             def plot_function() -> Response:
                 athlete_id = int(session["athlete_id"])
 
-                response_data: dict[str, list[str]] = defaultdict(list)
+                response_data: list[dict[str, str]] = []
 
                 if evm.use_s3():
                     tab_images = get_pre_signed_urls_for_tab_images(
                         athlete_id, tab.get_key()
                     )
-                    tab_captions = get_captions_for_tab_images(
-                        athlete_id, tab.get_key()
-                    )
+
+                    if not tab_images:
+                        return make_response(
+                            jsonify(
+                                {
+                                    "key": tab.get_key(),
+                                    "status": "Failure",
+                                    "tab_data": [],
+                                    "type": self.__class__.__name__,
+                                }
+                            )
+                        )
+
+                    try:
+                        tab_captions = get_captions_for_tab_images(
+                            athlete_id, tab.get_key()
+                        )
+                    except:
+                        return make_response(
+                            jsonify(
+                                {
+                                    "key": tab.get_key(),
+                                    "status": "Failure",
+                                    "tab_data": [],
+                                    "type": self.__class__.__name__,
+                                }
+                            )
+                        )
+
                     for k, v in tab_images.items():
-                        response_data[k].append(v)
-                    for k, v in tab_captions.items():
-                        response_data[k].append(v)
+                        response_data.append(
+                            {"presigned_url": v, "caption": tab_captions[k]}
+                        )
 
                 # Add the key to the response so that the frontend knows which tab the data is for.
                 response_json = {
                     "key": tab.get_key(),
+                    "status": "Success",
                     "tab_data": response_data,
                     "type": self.__class__.__name__,
                 }

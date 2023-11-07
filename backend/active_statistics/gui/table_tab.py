@@ -66,6 +66,7 @@ class TableTab(Tab):
                 # Add the key to the response so that the frontend knows which tab the data is for.
                 response_json = {
                     "key": tab.get_key(),
+                    "status": "Success",
                     "tab_data": table_data,
                     "type": self.__class__.__name__,
                 }
