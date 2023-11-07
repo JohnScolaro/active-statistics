@@ -23,16 +23,7 @@ from active_statistics.utils.local_storage import (
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
 from active_statistics.utils.sentry import set_up_sentry_for_server
-from flask import (
-    Flask,
-    jsonify,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for,
-)
+from flask import Flask, jsonify, make_response, redirect, request, session, url_for
 from requests.exceptions import HTTPError
 from rq.job import JobStatus
 from stravalib.client import Client
@@ -73,7 +64,7 @@ def authenticate() -> Response:
     # Do some terrible scope checking.
     # If we aren't given permission to read activities, just return to index.
     if scope != "read,activity:read":
-        return redirect(url_for("index", scope_incorrect=True))
+        return redirect("/?scope_incorrect=true")
 
     # Try the following. It can fail in a couple different ways, all due to
     # hitting the Strava rate limit.
@@ -90,7 +81,7 @@ def authenticate() -> Response:
         redis.set_strava_access_tokens(athlete.id, token_response)
         session["athlete_id"] = athlete.id
     except (HTTPError, RateLimitExceeded) as e:
-        return redirect(url_for("index", rate_limit_exceeded=True))
+        return redirect("/?rate_limit_exceeded=true")
 
     response = make_response(redirect("/home"))
     response.set_cookie("logged_in", "true")
