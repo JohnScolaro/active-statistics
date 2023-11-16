@@ -457,12 +457,12 @@ for tab in all_tabs:
     def generate_and_register_routes_for_children(tab_group: TabGroup) -> None:
         for tab in tab_group.children:
             if isinstance(tab, Tab):
-                tab.generate_and_register_routes(app, evm)
+                tab.generate_and_register_route(app, evm)
             if isinstance(tab, TabGroup):
                 generate_and_register_routes_for_children(tab)
 
     if isinstance(tab, Tab):
-        tab.generate_and_register_routes(app, evm)
+        tab.generate_and_register_route(app, evm)
     if isinstance(tab, TabGroup):
         generate_and_register_routes_for_children(tab)
 

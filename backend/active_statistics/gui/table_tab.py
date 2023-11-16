@@ -11,7 +11,7 @@ from active_statistics.utils.local_storage import (
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
 from active_statistics.utils.s3 import get_tab_data
-from flask import Flask, jsonify, make_response, session
+from flask import jsonify, make_response, session
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
 
@@ -37,46 +37,37 @@ class TableTab(Tab):
         self.description = description
         self.table_function = table_function
 
-    def generate_and_register_routes(
-        self, app: Flask, evm: EnvironmentVariableManager
-    ) -> None:
-        def get_data_function(tab: TableTab):
-            @unauthorized_if_no_session_cookie
-            def data_function() -> Response:
-                athlete_id = int(session["athlete_id"])
+    @unauthorized_if_no_session_cookie
+    def get_frontend_data(self, evm: EnvironmentVariableManager) -> Response:
+        athlete_id = int(session["athlete_id"])
 
-                if evm.use_s3():
-                    table_data_str = get_tab_data(athlete_id, tab.get_key())
+        if evm.use_s3():
+            table_data_str = get_tab_data(athlete_id, self.get_key())
 
-                    # If there is no data in S3 for this key, return a blank figure.
-                    table_data: dict[Any, Any]
-                    if table_data_str is None:
-                        table_data = {}
-                    else:
-                        table_data = json.loads(table_data_str)
-                else:
-                    activity_iterator: Iterator[Activity]
-                    if tab.is_detailed():
-                        activity_iterator = get_activity_iterator(athlete_id)
-                    else:
-                        activity_iterator = get_summary_activity_iterator(athlete_id)
+            # If there is no data in S3 for this key, return a blank figure.
+            table_data: dict[Any, Any]
+            if table_data_str is None:
+                table_data = {}
+            else:
+                table_data = json.loads(table_data_str)
+        else:
+            activity_iterator: Iterator[Activity]
+            if self.is_detailed():
+                activity_iterator = get_activity_iterator(athlete_id)
+            else:
+                activity_iterator = get_summary_activity_iterator(athlete_id)
 
-                    table_data = self.get_table_data(activity_iterator)
+            table_data = self.get_table_data(activity_iterator)
 
-                # Add the key to the response so that the frontend knows which tab the data is for.
-                response_json = {
-                    "key": tab.get_key(),
-                    "status": "Success",
-                    "tab_data": table_data,
-                    "type": self.__class__.__name__,
-                }
+        # Add the key to the response so that the frontend knows which tab the data is for.
+        response_json = {
+            "key": self.get_key(),
+            "status": "Success",
+            "tab_data": table_data,
+            "type": self.__class__.__name__,
+        }
 
-                return make_response(jsonify(response_json))
-
-            data_function.__name__ = f"{tab.get_key()}_data"
-            return data_function
-
-        app.add_url_rule(self.get_data_endpoint(), view_func=get_data_function(self))
+        return make_response(jsonify(response_json))
 
     def get_table_dataframe(self, activities: Iterator[Activity]) -> pd.DataFrame:
         if self.table_function is None:
@@ -117,9 +108,6 @@ class TableTab(Tab):
             "show_headings": self.has_column_headings(),
             "columns": self.get_columns(df),
         }
-
-    def get_data_endpoint(self) -> str:
-        return f"/api/data/{self.get_key()}"
 
     def get_type(self) -> str:
         return "table_tab"

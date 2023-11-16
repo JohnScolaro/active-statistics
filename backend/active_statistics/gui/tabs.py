@@ -3,6 +3,7 @@ from typing import Optional
 
 from active_statistics.utils.environment_variables import EnvironmentVariableManager
 from flask import Flask
+from werkzeug.wrappers import Response
 
 
 class Tab(ABC):
@@ -21,17 +22,25 @@ class Tab(ABC):
         else:
             return self.key
 
-    def get_page_endpoint(self) -> str:
-        return f"/page/{self.get_key()}"
-
-    def generate_and_register_routes(
+    def generate_and_register_route(
         self, app: Flask, evm: EnvironmentVariableManager
     ) -> None:
         """
-        This is a hefty function that is called on app startup, where the
-        server loops though all tabs and creates the routes required for them.
+        This function is called on app startup, and registers this tabs route
+        so that when the route is hit, the frontend message is returned.
         """
-        raise NotImplementedError()
+
+        def frontend_message_handler() -> Response:
+            return self.get_frontend_data(evm)
+
+        frontend_message_handler.__name__ = f"{self.get_key()}"
+        app.add_url_rule(
+            f"/api/data/{self.get_key()}", view_func=frontend_message_handler
+        )
+
+    @abstractmethod
+    def get_frontend_data(self, evm: EnvironmentVariableManager) -> Response:
+        pass
 
     def is_detailed(self) -> bool:
         return self.detailed
