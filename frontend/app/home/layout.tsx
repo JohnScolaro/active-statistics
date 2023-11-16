@@ -103,29 +103,6 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
       },
       router
     );
-    // fetch(url)
-    //   .then((response) => {
-    //     if (response.status == 401) {
-    //       console.log("ohh shit whadup boi1");
-    //       router.push("/");
-    //     }
-    //     return response.json();
-    //   })
-    //   .then((data) => {
-    //     updateDisabledSidebarSteps(type, data.status, setDisabledSidebarSteps);
-    //     setDataStatus(data);
-    //     if (!data.stop_polling) {
-    //       // If stopPolling is not true, poll again after 2 seconds
-    //       setTimeout(() => pollDataStatus(type, callback), 2000);
-    //     } else {
-    //       if (callback) {
-    //         callback(data.status);
-    //       }
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log("oopsie, an error happened.");
-    //   });
   }
 
   function updateDisabledSidebarSteps(
@@ -162,22 +139,6 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
       },
       router
     );
-    // fetch("/api/paid")
-    //   .then((response) => {
-    //     if (response.status == 401) {
-    //       console.log("ohh shit whadup boi2");
-    //       router.push("/");
-    //     }
-    //     return response.json();
-    //   })
-    //   .then((data) => {
-    //     setPaidUser(data);
-    //   })
-    //   .catch((err) => {
-    //     console.log(
-    //       "An unhandled error occurred while fetching whether or not the user is paid."
-    //     );
-    //   });
   }
 
   useEffect(() => {
@@ -215,30 +176,6 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
             () => {},
             router
           );
-          // fetch(url)
-          //   .then((response) => {
-          //     if (response.status == 401) {
-          //       console.log("ohh shit whadup boi3");
-          //       router.push("/");
-          //     }
-          //     return response.json();
-          //   })
-          //   .then((data) => {
-          //     if (data.refresh_accepted) {
-          //       setSummaryDataStatus({
-          //         message: "Attempting to refresh data.",
-          //         status: "",
-          //         stopPolling: false,
-          //       });
-          //       pollDataStatus("summary");
-          //     } else {
-          //       setSummaryDataStatus({
-          //         message: data.message,
-          //         status: "too_recent",
-          //         stopPolling: true,
-          //       });
-          //     }
-          //   });
         }
       });
     }

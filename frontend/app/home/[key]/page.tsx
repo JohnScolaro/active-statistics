@@ -20,6 +20,7 @@ export default function Page({ params }: { params: { key: string } }) {
       url,
       (data) => {
         setData(data);
+        setError(data.status != "Success");
         setLoaded(true);
       },
       (err) => {
