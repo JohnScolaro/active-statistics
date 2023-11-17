@@ -28,7 +28,7 @@ from active_statistics.statistics.trivia.min_max_summary_trivia import (
 )
 from active_statistics.statistics.trivia.summary_trivia import general_trivia
 
-all_tabs: list[Tab | TabGroup] = [
+tab_tree: list[Tab | TabGroup] = [
     TabGroup(
         name="Summary Data",
         key="summary_data",
@@ -156,3 +156,20 @@ all_tabs: list[Tab | TabGroup] = [
         ],
     ),
 ]
+
+
+def get_all_tabs() -> list[Tab]:
+    """
+    Return a flattened list of all the tabs in the tab tree. Just the actual tabs, not the TabGroups.
+    """
+
+    def flatten(tabs: list[Tab | TabGroup]) -> list[Tab]:
+        flattened_tabs = []
+        for tab in tabs:
+            if isinstance(tab, TabGroup):
+                flattened_tabs.extend(flatten(tab.children))
+            else:
+                flattened_tabs.append(tab)
+        return flattened_tabs
+
+    return flatten(tab_tree)
