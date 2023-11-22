@@ -87,7 +87,7 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
 
 function Error() {
   return (
-    <div className="h-full items-center text-center max-w-1/2 pt-[33vw]">
+    <div className="h-full items-center text-center max-w-1/2 pt-[33vh]">
       🚧 Oh no! 🚧
       <br />
       <br />
