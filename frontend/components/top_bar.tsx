@@ -16,13 +16,13 @@ export default function TopBar({ sidebarVisible, toggleSidebar }: TopBarProps) {
       <Link href="/" className="text-white text-2xl font-bold">
         <span className="align-middle">Active Statistics</span>
       </Link>
-      <Link href="https://github.com/JohnScolaro/active-statistics">
+      <Link href="https://github.com/JohnScolaro/active-statistics" className="h-full">
         <Image
           src="/github-mark-white.svg"
           width={0}
           height={0}
           alt="GitHub Logo"
-          className="w-auto h-full"
+          className="h-full w-auto"
         />
       </Link>
     </div>
