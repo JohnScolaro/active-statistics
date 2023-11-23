@@ -455,5 +455,6 @@ def tabs_route() -> Response:
 for tab in get_all_tabs():
     tab.generate_and_register_route(app, evm)
 
+
 if not evm.is_production():
     app.run(debug=True)

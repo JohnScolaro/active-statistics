@@ -3,3 +3,4 @@ envs/*
 !envs/prod.sh
 */logs/*
 storage*
+local_image_dir

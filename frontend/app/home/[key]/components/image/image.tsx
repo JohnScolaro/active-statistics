@@ -1,5 +1,5 @@
 interface ImageData {
-  presigned_url: string;
+  url: string;
   caption: string;
 }
 
@@ -10,11 +10,7 @@ export default function ImagePage({ data }: { data: ImageData[] }) {
         {data.map((image, index) => (
           <div key={index} className="p-2 border-2 border-green-500 rounded-lg">
             <div className="flex justify-center">
-              <img
-                src={image.presigned_url}
-                alt="Image"
-                className="h-auto w-auto max-h-[780px]"
-              />
+              <img src={image.url} alt="Image" className="h-auto w-auto max-h-[780px]" />
             </div>
             <div className="text-center text-sm">{image.caption}</div>
           </div>

@@ -10,7 +10,7 @@ from active_statistics.utils.local_storage import (
     get_summary_activity_iterator,
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
-from active_statistics.utils.s3 import get_tab_data
+from active_statistics.utils.s3 import get_object, save_table_json
 from flask import jsonify, make_response, session
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
@@ -36,38 +36,6 @@ class TableTab(Tab):
         super().__init__(name, detailed, **kwargs)
         self.description = description
         self.table_function = table_function
-
-    @unauthorized_if_no_session_cookie
-    def get_frontend_data(self, evm: EnvironmentVariableManager) -> Response:
-        athlete_id = int(session["athlete_id"])
-
-        if evm.use_s3():
-            table_data_str = get_tab_data(athlete_id, self.get_key())
-
-            # If there is no data in S3 for this key, return a blank figure.
-            table_data: dict[Any, Any]
-            if table_data_str is None:
-                table_data = {}
-            else:
-                table_data = json.loads(table_data_str)
-        else:
-            activity_iterator: Iterator[Activity]
-            if self.is_detailed():
-                activity_iterator = get_activity_iterator(athlete_id)
-            else:
-                activity_iterator = get_summary_activity_iterator(athlete_id)
-
-            table_data = self.get_table_data(activity_iterator)
-
-        # Add the key to the response so that the frontend knows which tab the data is for.
-        response_json = {
-            "key": self.get_key(),
-            "status": "Success",
-            "tab_data": table_data,
-            "type": self.__class__.__name__,
-        }
-
-        return make_response(jsonify(response_json))
 
     def get_table_dataframe(self, activities: Iterator[Activity]) -> pd.DataFrame:
         if self.table_function is None:
@@ -111,3 +79,30 @@ class TableTab(Tab):
 
     def get_type(self) -> str:
         return "table_tab"
+
+    def retrieve_frontend_data(
+        self, evm: EnvironmentVariableManager, athlete_id: int
+    ) -> Any:
+        if evm.use_s3():
+            table_string = get_object(athlete_id, self.get_key(), "table.json")
+            return json.loads(table_string)
+        else:
+            # If we aren't using s3, get the activity iterator here, because
+            # all the data should be pre-downloaded.
+            if self.is_detailed():
+                activity_iterator = get_activity_iterator(athlete_id)
+            else:
+                activity_iterator = get_summary_activity_iterator(athlete_id)
+            return self.get_table_data(activity_iterator)
+
+    def backend_processing_hook(
+        self,
+        activity_iterator: Iterator[Activity],
+        evm: EnvironmentVariableManager,
+        athlete_id: int,
+    ) -> None:
+        # If we aren't using S3, just leave it for the frontend hook to generate.
+        if evm.use_s3():
+            table_data = self.get_table_data(activity_iterator)
+            table_json_string = json.dumps(table_data)
+            save_table_json(athlete_id, self.get_key(), table_json_string)

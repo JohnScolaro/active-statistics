@@ -15,38 +15,40 @@ BUCKET_NAME = "athlete-data-storage"
 s3 = boto3.client("s3")
 
 
-def get_tab_data(athlete_id: int, tab_key: str) -> Optional[str]:
-    try:
-        response = s3.get_object(
-            Bucket=BUCKET_NAME,
-            Key=get_s3_key_from_athlete_and_tab_key(athlete_id, tab_key),
-        )
-        chart_json = response["Body"].read()
-        return chart_json.decode("utf-8")
-
-    except ClientError as e:
-        # Honestly we don't really care what the error is, if there is an error, just return None.
-        # In the future we could check if e.response["Error"]["Code"] == "NoSuchKey" or something,
-        # but for now, this is fine.
-        return None
+def get_object(athlete_id: int, tab_key: str, filename: str) -> str:
+    response = s3.get_object(
+        Bucket=BUCKET_NAME,
+        Key=f"{athlete_id}/{tab_key}/{filename}",
+    )
+    chart_json = response["Body"].read()
+    return chart_json.decode("utf-8")
 
 
-def save_tab_data(athlete_id: int, tab_key: str, chart_json: str) -> None:
+def upload_file(athlete_id: int, tab_key: str, filename: str) -> None:
+    # Upload the chart json to the S3 bucket
+    s3.upload_file(
+        Filename=filename,
+        Bucket=BUCKET_NAME,
+        Key=get_s3_key(athlete_id, tab_key, os.path.basename(filename)),
+    )
+
+
+def save_chart_json(athlete_id: int, tab_key: str, chart_json: str) -> None:
     # Upload the chart json to the S3 bucket
     s3.put_object(
         Body=chart_json,
         Bucket=BUCKET_NAME,
-        Key=get_s3_key_from_athlete_and_tab_key(athlete_id, tab_key),
+        Key=get_s3_key(athlete_id, tab_key, "chart.json"),
     )
 
 
-def save_tab_images(athlete_id: int, tab_key: str, paths: list[str]) -> None:
-    for path in paths:
-        s3.upload_file(
-            Filename=path,
-            Bucket=BUCKET_NAME,
-            Key=f"{athlete_id}/{tab_key}/{os.path.basename(path)}",
-        )
+def save_table_json(athlete_id: int, tab_key: str, table_json: str) -> None:
+    # Upload the table json to the S3 bucket
+    s3.put_object(
+        Body=table_json,
+        Bucket=BUCKET_NAME,
+        Key=get_s3_key(athlete_id, tab_key, "table.json"),
+    )
 
 
 def get_pre_signed_urls_for_tab_images(athlete_id: int, tab_key: str) -> dict[str, str]:
@@ -98,5 +100,5 @@ def is_there_any_data_for_athlete(athlete_id: int) -> bool:
     return bool(len(response["Contents"]))
 
 
-def get_s3_key_from_athlete_and_tab_key(athlete_id: int, tab_key: str) -> str:
-    return f"{str(athlete_id)}/{tab_key}.json"
+def get_s3_key(athlete_id: int, tab_key: str, file_name: str) -> str:
+    return f"{str(athlete_id)}/{tab_key}/{file_name}"
