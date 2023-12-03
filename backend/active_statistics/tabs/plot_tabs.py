@@ -3,7 +3,7 @@ from typing import Any, Callable, Iterator
 
 import plotly
 import plotly.graph_objects as go
-from active_statistics.gui.tabs import Tab
+from active_statistics.tabs.tabs import Tab
 from active_statistics.utils.environment_variables import EnvironmentVariableManager
 from active_statistics.utils.local_storage import (
     get_activity_iterator,

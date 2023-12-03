@@ -1,80 +1,140 @@
-from abc import ABC, abstractmethod
-from typing import Any, Iterator, Optional
+from active_statistics.statistics.images import polyline_grid, polyline_overlay
+from active_statistics.statistics.plots import (
+    average_heartrate_by_average_speed,
+    cumulative_distance_travelled,
+    cumulative_gear_distance,
+    cumulative_gear_time,
+    cumulative_time_spent,
+    github_style_activities,
+    histogram_of_activity_time,
+    pace_timeline,
+    personal_bests,
+)
+from active_statistics.statistics.tables.flagged_activities import (
+    flagged_activities_table,
+)
+from active_statistics.statistics.trivia.detailed_trivia import (
+    detailed_trivia_processor,
+)
+from active_statistics.statistics.trivia.min_max_summary_trivia import (
+    min_and_max_distance_trivia_processor,
+    min_and_max_elevation_trivia_processor,
+)
+from active_statistics.statistics.trivia.summary_trivia import general_trivia
+from active_statistics.tabs.image_tab import ImageTab
+from active_statistics.tabs.plot_tabs import PlotTab
+from active_statistics.tabs.table_tab import TableTab
+from active_statistics.tabs.trivia_tabs import TriviaTab
 
-from active_statistics.utils.environment_variables import EnvironmentVariableManager
-from active_statistics.utils.routes import unauthorized_if_no_session_cookie
-from flask import Flask, jsonify, make_response, session
-from stravalib.model import Activity
-from werkzeug.wrappers import Response
+cumulative_time_tab = PlotTab(
+    name="Cumulative Time",
+    description="A cumulative plot of how much time you've logged on Strava for each of your activity types.",
+    plot_function=cumulative_time_spent.plot,
+    detailed=False,
+)
+
+cumululative_distance_tab = PlotTab(
+    name="Cumulative Distance",
+    description="A cumulative plot of the total distance you've travelled from the activities that you've logged on Strava.",
+    plot_function=cumulative_distance_travelled.plot,
+    detailed=False,
+)
+
+calendar_tab = PlotTab(
+    name="Calendar",
+    description="This plot draws inspiration from the GitHub contributions plot to show how much you're running over a calendar year.",
+    plot_function=github_style_activities.plot,
+    detailed=False,
+)
+
+average_hr_by_average_speed_tab = PlotTab(
+    name="Average HR by Average Speed",
+    description="This plot shows your average heartrate by your average speed for all running activities. It needs activities with an average heartrate to work, so if you don't record your heartrate with your activities, then this plot will be blank.",
+    plot_function=average_heartrate_by_average_speed.plot,
+    detailed=False,
+)
+
+pace_timeline_tab = PlotTab(
+    name="Pace Timeline",
+    description="This plot shows the pace of your runs on a timeline. Overlaid, there is a 30 day moving average line. At any point on this line, the value is the average pace of all runs 15 days in front and behind it.",
+    plot_function=pace_timeline.plot,
+    detailed=False,
+)
+
+histogram_of_activity_times_tab = PlotTab(
+    name="Histogram of Activity Times",
+    description="This is a histogram of all your activity start times.",
+    plot_function=histogram_of_activity_time.plot,
+    detailed=False,
+)
+
+min_and_max_distance_activities_tab = TriviaTab(
+    name="Min and Max Distance Activities",
+    detailed=False,
+    description="Some Trivia about your longest and shortest Strava activities.",
+    trivia_processor=min_and_max_distance_trivia_processor,
+)
+
+min_and_max_elevation_activities_tab = TriviaTab(
+    name="Min and Max Elevation Activities",
+    detailed=False,
+    description="Some Trivia about your hilliest and flattest Strava activities.",
+    trivia_processor=min_and_max_elevation_trivia_processor,
+)
+
+general_trivia_tab = TriviaTab(
+    name="General Trivia",
+    detailed=False,
+    description="Some miscellaneous trivia about your Strava activities.",
+    trivia_processor=general_trivia,
+)
+
+flagged_activities_tab = TableTab(
+    name="Flagged Activities",
+    detailed=False,
+    description="If any of your activities have been flagged for cheating on Strava, they will be displayed in a table below.",
+    table_function=flagged_activities_table,
+)
 
 
-class Tab(ABC):
-    def __init__(self, name: str, detailed: bool, key: Optional[str] = None) -> None:
-        self.name = name
-        self.detailed = detailed
-        self.key = key
+polyline_overlay_tab = ImageTab(
+    name="Polyline Overlay",
+    detailed=False,
+    description="yeet",
+    create_images_function=polyline_overlay.create_images,
+)
 
-    def get_name(self) -> str:
-        return self.name
+polyline_grid_tab = ImageTab(
+    name="Polyline Grid",
+    detailed=False,
+    description="yeet",
+    create_images_function=polyline_grid.create_images,
+)
 
-    def get_key(self) -> str:
-        if self.key is None:
-            # I can't be bothered using slugify.
-            return self.name.lower().replace(" ", "_")
-        else:
-            return self.key
+personal_bests_tab = PlotTab(
+    name="Personal Bests",
+    description='This is a chart that shows a timeline of your personal bests. It is calculated using Strava\'s "Best Efforts" from all of your activities.',
+    plot_function=personal_bests.plot,
+    detailed=True,
+)
 
-    def is_detailed(self) -> bool:
-        return self.detailed
+cumulative_gear_time_tab = PlotTab(
+    name="Cumulative Gear Time",
+    description="A cumulative plot of the time logged with Strava using different gear.",
+    plot_function=cumulative_gear_time.plot,
+    detailed=True,
+)
 
-    @abstractmethod
-    def get_type(self) -> str:
-        pass
+cumulative_gear_distance_tab = PlotTab(
+    name="Cumulative Gear Distance",
+    description="A cumuative plot of the distance travelled while using different gear that you've logged on Strava.",
+    plot_function=cumulative_gear_distance.plot,
+    detailed=True,
+)
 
-    def generate_and_register_route(
-        self, app: Flask, evm: EnvironmentVariableManager
-    ) -> None:
-        """
-        This function is called on app startup, and registers this tabs route
-        so that when the route is hit, the frontend message is returned.
-        """
-
-        @unauthorized_if_no_session_cookie
-        def frontend_data_retrieval_hook() -> Response:
-            athlete_id = int(session["athlete_id"])
-
-            response_msg = {"key": self.get_key(), "type": self.__class__.__name__}
-
-            try:
-                frontend_data = self.retrieve_frontend_data(evm, athlete_id)
-                response_msg["status"] = "Success"
-                response_msg["tab_data"] = frontend_data
-
-            except Exception as e:
-                response_msg["status"] = "Failure"
-
-            return make_response(jsonify(response_msg))
-
-        frontend_data_retrieval_hook.__name__ = f"{self.get_key()}"
-        app.add_url_rule(
-            f"/api/data/{self.get_key()}", view_func=frontend_data_retrieval_hook
-        )
-
-    @abstractmethod
-    def retrieve_frontend_data(
-        self, evm: EnvironmentVariableManager, athlete_id: int
-    ) -> Any:
-        pass
-
-    @abstractmethod
-    def backend_processing_hook(
-        self,
-        activity_iterator: Iterator[Activity],
-        evm: EnvironmentVariableManager,
-        athlete_id: int,
-    ) -> None:
-        """
-        This is the backend processing hook for the tab. It is called when the
-        rq worker attempts to do any preprocessing for the tab.
-        """
-        pass
+detailed_trivia_tab = TriviaTab(
+    name="Detailed Trivia",
+    detailed=True,
+    description="Some more in-depth trivia about your Strava activities, which requires downloading your detailed activities to see.",
+    trivia_processor=detailed_trivia_processor,
+)

@@ -10,6 +10,10 @@ class HottestActivityTidbit(TriviaTidbitBase):
         self.activity_id: Optional[int] = None
         self.hottest_temp: Optional[int] = None
 
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.hottest_temp = None
+
     def process_activity(self, activity: Activity) -> None:
         if activity.average_temp is None:
             return
@@ -35,6 +39,10 @@ class ColdestActivityTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.activity_id: Optional[int] = None
         self.coldest_temp: Optional[int] = None
+
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.coldest_temp = None
 
     def process_activity(self, activity: Activity) -> None:
         if activity.average_temp is None:
@@ -62,6 +70,10 @@ class MostPeopleOnAGroupRunTidbit(TriviaTidbitBase):
         self.activity_id: Optional[int] = None
         self.most_people: Optional[int] = None
 
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.most_people = None
+
     def process_activity(self, activity: Activity) -> None:
         if self.most_people is None or self.most_people < activity.athlete_count:
             self.activity_id = activity.id
@@ -84,6 +96,10 @@ class HighestHeartRateRecordedTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.activity_id: Optional[int] = None
         self.highest_max_heartrate: Optional[int] = None
+
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.highest_max_heartrate = None
 
     def process_activity(self, activity: Activity) -> None:
         if activity.max_heartrate is None:
@@ -114,6 +130,10 @@ class LowestHeartRateRecordedTidbit(TriviaTidbitBase):
         self.activity_id: Optional[int] = None
         self.lowest_max_heartrate: Optional[int] = None
 
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.lowest_max_heartrate = None
+
     def process_activity(self, activity: Activity) -> None:
         if activity.max_heartrate is None:
             return
@@ -142,6 +162,10 @@ class HighestAverageHeartrateTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.activity_id: Optional[int] = None
         self.highest_average_heartrate: Optional[int] = None
+
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.highest_average_heartrate = None
 
     def process_activity(self, activity: Activity) -> None:
         if activity.max_heartrate is None:
@@ -172,6 +196,10 @@ class LowestAverageHeartrateTidbit(TriviaTidbitBase):
         self.activity_id: Optional[int] = None
         self.lowest_average_heartrate: Optional[int] = None
 
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.lowest_average_heartrate = None
+
     def process_activity(self, activity: Activity) -> None:
         if activity.max_heartrate is None:
             return
@@ -201,6 +229,10 @@ class MostKudosedActivityTidbit(TriviaTidbitBase):
         self.activity_id: Optional[int] = None
         self.max_kudos: Optional[int] = None
 
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.max_kudos = None
+
     def process_activity(self, activity: Activity) -> None:
         if self.max_kudos is None or activity.kudos_count > self.max_kudos:
             self.activity_id = activity.id
@@ -224,6 +256,10 @@ class FirstActivityRecordedTidbit(TriviaTidbitBase):
         self.activity_id: Optional[int] = None
         self.activity_date: Optional[dt.datetime] = None
 
+    def reset_tidbit(self) -> None:
+        self.activity_id = None
+        self.activity_date = None
+
     def process_activity(self, activity: Activity) -> None:
         if self.activity_date is None or self.activity_date > activity.start_date_local:
             self.activity_id = activity.id
@@ -246,6 +282,9 @@ class TotalKudosRecievedTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.kudos_count: int = 0
 
+    def reset_tidbit(self) -> None:
+        self.kudos_count = 0
+
     def process_activity(self, activity: Activity) -> None:
         if activity.kudos_count is not None:
             self.kudos_count += activity.kudos_count
@@ -261,6 +300,10 @@ class EarliestActivityTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.earliest_activity_id: Optional[int] = None
         self.time_of_earliest_activity: Optional[dt.datetime] = None
+
+    def reset_tidbit(self) -> None:
+        self.earliest_activity_id = None
+        self.time_of_earliest_activity = None
 
     def process_activity(self, activity: Activity) -> None:
         if activity.start_date_local is not None:
@@ -290,6 +333,10 @@ class LatestActivityTidbit(TriviaTidbitBase):
         self.latest_activity_id: Optional[int] = None
         self.time_of_latest_activity: Optional[dt.time] = None
 
+    def reset_tidbit(self) -> None:
+        self.latest_activity_id = None
+        self.time_of_latest_activity = None
+
     def process_activity(self, activity: Activity) -> None:
         if activity.start_date_local is not None:
             activity_time = activity.start_date_local.time()
@@ -316,6 +363,9 @@ class LatestActivityTidbit(TriviaTidbitBase):
 class MostConsecutiveDaysOfActivities(TriviaTidbitBase):
     def __init__(self) -> None:
         self.date_list: list[dt.date] = []
+
+    def reset_tidbit(self) -> None:
+        self.date_list = []
 
     def process_activity(self, activity: Activity) -> None:
         if activity.start_date_local is not None:
