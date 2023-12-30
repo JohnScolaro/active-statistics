@@ -4,18 +4,15 @@ A collection of helpers for all s3 related tasks.
 
 import json
 import os
-from typing import Optional
 
 import boto3
-from botocore.exceptions import ClientError
 
 BUCKET_NAME = "athlete-data-storage"
 
-# Create an S3 client
-s3 = boto3.client("s3")
-
 
 def get_object(athlete_id: int, tab_key: str, filename: str) -> str:
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
+
     response = s3.get_object(
         Bucket=BUCKET_NAME,
         Key=f"{athlete_id}/{tab_key}/{filename}",
@@ -25,6 +22,8 @@ def get_object(athlete_id: int, tab_key: str, filename: str) -> str:
 
 
 def upload_file(athlete_id: int, tab_key: str, filename: str) -> None:
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
+
     # Upload the chart json to the S3 bucket
     s3.upload_file(
         Filename=filename,
@@ -34,6 +33,8 @@ def upload_file(athlete_id: int, tab_key: str, filename: str) -> None:
 
 
 def save_chart_json(athlete_id: int, tab_key: str, chart_json: str) -> None:
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
+
     # Upload the chart json to the S3 bucket
     s3.put_object(
         Body=chart_json,
@@ -43,6 +44,8 @@ def save_chart_json(athlete_id: int, tab_key: str, chart_json: str) -> None:
 
 
 def save_table_json(athlete_id: int, tab_key: str, table_json: str) -> None:
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
+
     # Upload the table json to the S3 bucket
     s3.put_object(
         Body=table_json,
@@ -52,6 +55,8 @@ def save_table_json(athlete_id: int, tab_key: str, table_json: str) -> None:
 
 
 def get_pre_signed_urls_for_tab_images(athlete_id: int, tab_key: str) -> dict[str, str]:
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
+
     # List all objects in the S3 directory
     try:
         objects = s3.list_objects_v2(
@@ -83,6 +88,8 @@ def get_pre_signed_urls_for_tab_images(athlete_id: int, tab_key: str) -> dict[st
 
 
 def get_captions_for_tab_images(athlete_id: int, tab_key: str) -> dict[str, str]:
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
+
     response = s3.get_object(
         Bucket=BUCKET_NAME,
         Key=f"{athlete_id}/{tab_key}/captions.json",
@@ -93,7 +100,7 @@ def get_captions_for_tab_images(athlete_id: int, tab_key: str) -> dict[str, str]
 
 
 def is_there_any_data_for_athlete(athlete_id: int) -> bool:
-    s3 = boto3.client("s3")
+    s3 = boto3.client("s3", region_name="ap-southeast-2")
 
     # Check if there are any objects in the folder
     response = s3.list_objects_v2(Bucket=BUCKET_NAME, Prefix=str(athlete_id) + "/")
