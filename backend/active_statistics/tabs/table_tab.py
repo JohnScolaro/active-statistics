@@ -50,10 +50,20 @@ class TableTab(Tab):
 
     def get_columns(self, df: pd.DataFrame) -> list[dict[str, str]]:
         column_types = self.get_table_column_types()
-        return [
-            {"column_name": col, "column_type": column_types.get(col, "string")}
-            for col in df.columns
-        ]
+
+        # Default column types are "string" for all columns UNLESS there is a
+        # single instance of a LinkCell in that column.
+        cols: list[dict[str, str]] = []
+        for col in df.columns:
+            col_type = "string"
+            if any(isinstance(obj, LinkCell) for obj in df[col]):
+                col_type = "link"
+
+            cols.append(
+                {"column_name": col, "column_type": column_types.get(col, col_type)}
+            )
+
+        return cols
 
     def get_table_data(self, activities: Iterator[Activity]) -> dict[str, Any]:
         df = self.get_table_dataframe(activities)

@@ -9,6 +9,7 @@ from active_statistics.statistics.plots import (
     pace_timeline,
     personal_bests,
 )
+from active_statistics.statistics.tables import top_hundred
 from active_statistics.statistics.tables.flagged_activities import (
     flagged_activities_table,
 )
@@ -130,6 +131,29 @@ flagged_activities_tab = TableTab(
     table_function=flagged_activities_table,
 )
 
+top_100_longest_runs_tab = TableTab(
+    name="Top 100 Longest Runs",
+    description="Shows the top 100 longest runs you've ever done.",
+    table_function=top_hundred.get_top_hundred_table_function(
+        "Run",
+        "distance",
+        "Distance (km)",
+        top_hundred.distance_conversion_function_to_km,
+    ),
+    detailed=False,
+)
+
+top_100_longest_rides_tab = TableTab(
+    name="Top 100 Longest Rides",
+    description="Shows the top 100 longest rides you've ever done.",
+    table_function=top_hundred.get_top_hundred_table_function(
+        "Ride",
+        "distance",
+        "Distance (km)",
+        top_hundred.distance_conversion_function_to_km,
+    ),
+    detailed=False,
+)
 
 polyline_overlay_tab = ImageTab(
     name="Polyline Overlay",
