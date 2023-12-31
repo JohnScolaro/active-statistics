@@ -47,7 +47,7 @@ def get_top_hundred_table_function(
         df = df.head(100)
 
         # Add a rank column as the first column
-        df.insert(0, "rank", df.reset_index().index + 1)
+        df.insert(0, "Rank", df.reset_index().index + 1)
 
         # Shorten the values
         df[attribute_column_name] = df[attribute_column_name].apply(
