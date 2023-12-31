@@ -17,6 +17,8 @@ from active_statistics.gui.tabs import (
     personal_bests_tab,
     polyline_grid_tab,
     polyline_overlay_tab,
+    top_100_longest_rides_tab,
+    top_100_longest_runs_tab,
 )
 from active_statistics.tabs.tab_group import TabGroup
 from active_statistics.tabs.tabs import Tab
@@ -48,6 +50,8 @@ tab_tree: list[Tab | TabGroup] = [
                     min_and_max_elevation_activities_tab,
                     general_trivia_tab,
                     flagged_activities_tab,
+                    top_100_longest_runs_tab,
+                    top_100_longest_rides_tab,
                 ],
             ),
             TabGroup(
