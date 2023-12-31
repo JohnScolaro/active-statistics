@@ -47,14 +47,20 @@ class EnvironmentVariableManager:
         strava_client_secret: str
         flask_secret_key: str
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
         # Using .get returns None for environment variables that dont exist, but that's fine because we validate them
         # with pydantic after this anyway.
-        vars: dict[str, Any] = {
+        vars: dict[str, Optional[str]] = {
             variable.lower(): os.environ.get(variable)
             for variable in self.ALL_VARIABLES
         }
-        self.variables = self.ValidEnvironmentVariables(**vars)
+
+        # If variables are passed in via kwargs, override the envvar variables.
+        # This is useful for unit testing.
+        kwarg_vars: dict[str, Any] = {k: v for k, v in kwargs.items()}
+        vars = vars | kwarg_vars
+
+        self.variables = self.ValidEnvironmentVariables(**vars)  # type: ignore
 
     def get_domain(self) -> str:
         return self.variables.domain

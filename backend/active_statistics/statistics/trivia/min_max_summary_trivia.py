@@ -18,6 +18,11 @@ class MinAttributeTidbit(TriviaTidbitBase):
         self.min_attribute_value: Optional[uh.Quantity] = None
         self.activity_type: Optional[ActivityType] = activity_type
 
+    def reset_tidbit(self) -> None:
+        self.all_distances_zero = True
+        self.min_activity_id = None
+        self.min_attribute_value = None
+
     def process_activity(self, activity: Activity) -> None:
         attr_value = getattr(activity, self.attribute_name)
 
@@ -67,6 +72,11 @@ class MaxAttributeTidbit(TriviaTidbitBase):
         self.attribute_name = attribute_name
         self.max_attribute_value: Optional[uh.Quantity] = None
         self.activity_type: Optional[ActivityType] = activity_type
+
+    def reset_tidbit(self) -> None:
+        self.all_distances_zero = True
+        self.max_activity_id = None
+        self.max_attribute_value = None
 
     def process_activity(self, activity: Activity) -> None:
         attr_value = getattr(activity, self.attribute_name)

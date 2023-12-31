@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Union
 
-from active_statistics.gui.tabs import Tab
+from active_statistics.tabs.tabs import Tab
 
 
 @dataclasses.dataclass

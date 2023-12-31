@@ -10,9 +10,9 @@ from active_statistics.communication_schema import (
     DataStatusMessage,
     RefreshStatusMessage,
 )
-from active_statistics.gui.gui import all_tabs
-from active_statistics.gui.tab_group import TabGroup
-from active_statistics.gui.tabs import Tab
+from active_statistics.gui.gui import get_all_tabs, tab_tree
+from active_statistics.tabs.tab_group import TabGroup
+from active_statistics.tabs.tabs import Tab
 from active_statistics.utils import human_readable_time, redis, rq
 from active_statistics.utils.environment_variables import evm
 from active_statistics.utils.local_storage import (
@@ -23,7 +23,7 @@ from active_statistics.utils.local_storage import (
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
 from active_statistics.utils.sentry import set_up_sentry_for_server
-from flask import Flask, jsonify, make_response, redirect, request, session, url_for
+from flask import Flask, jsonify, make_response, redirect, request, session
 from requests.exceptions import HTTPError
 from rq.job import JobStatus
 from stravalib.client import Client
@@ -448,23 +448,12 @@ def tabs_route() -> Response:
             name=tab.name, key=tab.get_key(), type=tab.get_type(), items=items
         ).to_dict()
 
-    return make_response(jsonify(expand_tabs(all_tabs)))
+    return make_response(jsonify(expand_tabs(tab_tree)))
 
 
 # Before the app starts, we want to generate all the routes for our tabs.
-for tab in all_tabs:
-
-    def generate_and_register_routes_for_children(tab_group: TabGroup) -> None:
-        for tab in tab_group.children:
-            if isinstance(tab, Tab):
-                tab.generate_and_register_routes(app, evm)
-            if isinstance(tab, TabGroup):
-                generate_and_register_routes_for_children(tab)
-
-    if isinstance(tab, Tab):
-        tab.generate_and_register_routes(app, evm)
-    if isinstance(tab, TabGroup):
-        generate_and_register_routes_for_children(tab)
+for tab in get_all_tabs():
+    tab.generate_and_register_route(app, evm)
 
 
 if not evm.is_production():

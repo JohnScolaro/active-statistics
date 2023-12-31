@@ -43,6 +43,8 @@ export default function Page({ params }: { params: { key: string } }) {
 }
 
 function PageContentComponent({ params, data }: { params: { key: string }; data: any }) {
+  console.log(params);
+  console.log(data);
   if (data.type == "PlotTab") {
     return (
       <Plot
@@ -87,7 +89,7 @@ function PageContentComponent({ params, data }: { params: { key: string }; data:
 
 function Error() {
   return (
-    <div className="h-full items-center text-center max-w-1/2 mt-[33vw]">
+    <div className="h-full items-center text-center max-w-1/2 pt-[33vh]">
       🚧 Oh no! 🚧
       <br />
       <br />

@@ -1,8 +1,8 @@
 from typing import Any, Iterator
 
 import pandas as pd
-from active_statistics.gui.table_tab import TableTab
 from active_statistics.statistics.trivia import TriviaProcessor
+from active_statistics.tabs.table_tab import TableTab
 from stravalib.model import Activity
 
 

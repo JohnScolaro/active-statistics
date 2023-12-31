@@ -1,4 +1,4 @@
-from active_statistics.gui.table_tab import LinkCell
+from active_statistics.tabs.table_tab import LinkCell
 
 
 def get_link(url: str) -> LinkCell:

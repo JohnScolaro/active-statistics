@@ -24,6 +24,7 @@ dev_requires = [
     "black==23.7.0",
     "isort==5.12.0",
     "factory-boy==3.3.0",
+    "moto==4.2.11",
 ]
 
 types_requires = [

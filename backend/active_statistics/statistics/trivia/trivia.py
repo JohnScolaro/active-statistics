@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Iterator, Optional
 
-from active_statistics.gui.table_tab import LinkCell
 from active_statistics.statistics.utils.strava_links import (
     get_activity_url,
     get_link,
     get_segment_url,
 )
+from active_statistics.tabs.table_tab import LinkCell
 from stravalib.model import Activity
 
 
@@ -47,6 +47,14 @@ class TriviaTidbitBase(ABC):
         """
         pass
 
+    @abstractmethod
+    def reset_tidbit(self) -> None:
+        """
+        Only important for running the tidbit locally, but you need to wipe the
+        tidbit stats between each run because otherwise the second time you hit
+        the tab, everything gets processed again and
+        """
+
     def get_activity_id(self) -> Optional[int]:
         """
         If we want to link to activities, we just implement this function which
@@ -82,7 +90,7 @@ class TriviaTidbitBase(ABC):
 
 class TriviaProcessor:
     """
-    The trivia processor is processes all the individual tidbits of trivia,
+    The trivia processor processes all the individual tidbits of trivia,
     and returns them all as a list.
     """
 
@@ -96,6 +104,10 @@ class TriviaProcessor:
         self, activities: Iterator[Activity]
     ) -> list[tuple[str, str, LinkCell | None]]:
         trivia: list[tuple[str, str, LinkCell | None]] = []
+
+        # Reset tidbits
+        for tidbit in self.tidbits:
+            tidbit.reset_tidbit()
 
         # Process activities
         for activity in activities:

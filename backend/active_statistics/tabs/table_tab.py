@@ -3,15 +3,15 @@ import json
 from typing import Any, Callable, Iterator, Literal, Optional
 
 import pandas as pd
-from active_statistics.gui.tabs import Tab
+from active_statistics.tabs.tabs import Tab
 from active_statistics.utils.environment_variables import EnvironmentVariableManager
 from active_statistics.utils.local_storage import (
     get_activity_iterator,
     get_summary_activity_iterator,
 )
 from active_statistics.utils.routes import unauthorized_if_no_session_cookie
-from active_statistics.utils.s3 import get_tab_data
-from flask import Flask, jsonify, make_response, session
+from active_statistics.utils.s3 import get_object, save_table_json
+from flask import jsonify, make_response, session
 from stravalib.model import Activity
 from werkzeug.wrappers import Response
 
@@ -36,47 +36,6 @@ class TableTab(Tab):
         super().__init__(name, detailed, **kwargs)
         self.description = description
         self.table_function = table_function
-
-    def generate_and_register_routes(
-        self, app: Flask, evm: EnvironmentVariableManager
-    ) -> None:
-        def get_data_function(tab: TableTab):
-            @unauthorized_if_no_session_cookie
-            def data_function() -> Response:
-                athlete_id = int(session["athlete_id"])
-
-                if evm.use_s3():
-                    table_data_str = get_tab_data(athlete_id, tab.get_key())
-
-                    # If there is no data in S3 for this key, return a blank figure.
-                    table_data: dict[Any, Any]
-                    if table_data_str is None:
-                        table_data = {}
-                    else:
-                        table_data = json.loads(table_data_str)
-                else:
-                    activity_iterator: Iterator[Activity]
-                    if tab.is_detailed():
-                        activity_iterator = get_activity_iterator(athlete_id)
-                    else:
-                        activity_iterator = get_summary_activity_iterator(athlete_id)
-
-                    table_data = self.get_table_data(activity_iterator)
-
-                # Add the key to the response so that the frontend knows which tab the data is for.
-                response_json = {
-                    "key": tab.get_key(),
-                    "status": "Success",
-                    "tab_data": table_data,
-                    "type": self.__class__.__name__,
-                }
-
-                return make_response(jsonify(response_json))
-
-            data_function.__name__ = f"{tab.get_key()}_data"
-            return data_function
-
-        app.add_url_rule(self.get_data_endpoint(), view_func=get_data_function(self))
 
     def get_table_dataframe(self, activities: Iterator[Activity]) -> pd.DataFrame:
         if self.table_function is None:
@@ -118,8 +77,32 @@ class TableTab(Tab):
             "columns": self.get_columns(df),
         }
 
-    def get_data_endpoint(self) -> str:
-        return f"/api/data/{self.get_key()}"
-
     def get_type(self) -> str:
         return "table_tab"
+
+    def retrieve_frontend_data(
+        self, evm: EnvironmentVariableManager, athlete_id: int
+    ) -> Any:
+        if evm.use_s3():
+            table_string = get_object(athlete_id, self.get_key(), "table.json")
+            return json.loads(table_string)
+        else:
+            # If we aren't using s3, get the activity iterator here, because
+            # all the data should be pre-downloaded.
+            if self.is_detailed():
+                activity_iterator = get_activity_iterator(athlete_id)
+            else:
+                activity_iterator = get_summary_activity_iterator(athlete_id)
+            return self.get_table_data(activity_iterator)
+
+    def backend_processing_hook(
+        self,
+        activity_iterator: Iterator[Activity],
+        evm: EnvironmentVariableManager,
+        athlete_id: int,
+    ) -> None:
+        # If we aren't using S3, just leave it for the frontend hook to generate.
+        if evm.use_s3():
+            table_data = self.get_table_data(activity_iterator)
+            table_json_string = json.dumps(table_data)
+            save_table_json(athlete_id, self.get_key(), table_json_string)

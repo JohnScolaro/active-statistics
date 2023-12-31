@@ -19,10 +19,16 @@ class TotalNumberOfSegmentsTidbit(TriviaTidbitBase):
     def get_tidbit(self) -> Optional[str]:
         return str(self.segment_count)
 
+    def reset_tidbit(self) -> None:
+        self.segment_count = 0
+
 
 class TotalUniqueSegmentsTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.segment_counter: Counter[int] = Counter()
+
+    def reset_tidbit(self) -> None:
+        self.segment_counter = Counter()
 
     def process_activity(self, activity: Activity) -> None:
         if activity.segment_efforts is not None:
@@ -40,6 +46,9 @@ class TotalUniqueSegmentsTidbit(TriviaTidbitBase):
 class MostRanSegmentTidbit(TriviaTidbitBase):
     def __init__(self) -> None:
         self.segment_counter: Counter[int] = Counter()
+
+    def reset_tidbit(self) -> None:
+        self.segment_counter = Counter()
 
     def process_activity(self, activity: Activity) -> None:
         if activity.segment_efforts is not None:
@@ -59,7 +68,11 @@ class MostRanSegmentTidbit(TriviaTidbitBase):
         return f"{num_completions} completions"
 
     def get_segment_id(self) -> Optional[int]:
-        return self.segment_counter.most_common(1)[0][0]
+        most_common_segment = self.segment_counter.most_common(1)
+        if not most_common_segment:
+            return None
+        else:
+            return most_common_segment[0][0]
 
 
 detailed_trivia_processor = TriviaProcessor()

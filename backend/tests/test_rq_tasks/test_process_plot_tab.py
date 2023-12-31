@@ -3,14 +3,14 @@ from typing import Iterator
 import pandas as pd
 import plotly.graph_objects as go
 import pytest
-from active_statistics.gui.image_tab import ImageTab
-from active_statistics.gui.plot_tabs import PlotTab
-from active_statistics.gui.table_tab import TableTab
-from active_statistics.gui.tabs import Tab
-from active_statistics.gui.trivia_tabs import TriviaTab
 from active_statistics.rq_tasks import get_and_process_detailed_statistics
 from active_statistics.statistics.images.polyline_grid import create_images
 from active_statistics.statistics.trivia.trivia import TriviaProcessor
+from active_statistics.tabs.image_tab import ImageTab
+from active_statistics.tabs.plot_tabs import PlotTab
+from active_statistics.tabs.table_tab import TableTab
+from active_statistics.tabs.tabs import Tab
+from active_statistics.tabs.trivia_tabs import TriviaTab
 from pytest import MonkeyPatch
 from stravalib.model import Activity, Map
 from tests.factories.activity_factories import ActivityFactory
