@@ -51,6 +51,7 @@ class Tab(ABC):
                 response_msg["tab_data"] = frontend_data
 
             except Exception as e:
+                print(e)
                 response_msg["status"] = "Failure"
 
             return make_response(jsonify(response_msg))

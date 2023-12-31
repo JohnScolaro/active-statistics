@@ -1,7 +1,7 @@
 import dataclasses
 import datetime as dt
 import itertools
-from typing import Any, Iterator, Optional
+from typing import Any, Callable, Iterator, Optional
 
 import plotly.graph_objects as go
 from stravalib import unithelper as uh
@@ -14,64 +14,89 @@ ALL_ACTIVITIES = "All"
 class CompactActivity:
     type: ActivityType
     start_date_local: dt.datetime
-    distance: uh.Quantity
+    activity_attribute: Any
 
 
-def plot(activity_iterator: Iterator[Activity]) -> go.Figure:
-    compact_activities: list[CompactActivity] = get_compact_activities(
-        activity_iterator
-    )
+def get_plot_function(
+    activity_attribute_name: str,
+    conversion_function: Callable[[Any], Any],
+    yaxis_title: str,
+    plot_title_creator: Callable[[str], str],
+) -> Callable[[Iterator[Activity]], go.Figure]:
+    """
+    Takes a few values to customize a tab, and returns a function that when
+    called with an iterator of activities, returns a plotly figure of a
+    cumulative plot about the attribute of interest.
+    """
 
-    # Get set of all the different types of activities this person has logged.
-    activity_types = set(activity.type for activity in compact_activities)
-
-    all_plots: dict[ActivityType, dict[int, go.Scatter]] = {}
-
-    # Make plots for all activities
-    all_plots[ALL_ACTIVITIES] = plot_graph(compact_activities)
-
-    # Make plots for specific activities
-    for activity_type in activity_types:
-        all_plots[activity_type] = plot_graph(
-            list(
-                filter(
-                    lambda activity: activity.type == activity_type, compact_activities
-                )
-            ),
+    def plot(activity_iterator: Iterator[Activity]) -> go.Figure:
+        compact_activities: list[CompactActivity] = get_compact_activities(
+            activity_attribute_name, activity_iterator, conversion_function
         )
 
-    data = get_figure_data_from_all_activity_data(all_plots)
-    layout = get_layout_from_all_activity_data(all_plots)
+        # Get set of all the different types of activities this person has logged.
+        activity_types = set(activity.type for activity in compact_activities)
 
-    fig = go.Figure(data=data, layout=layout)
-    return fig
+        all_plots: dict[ActivityType, dict[int, go.Scatter]] = {}
+
+        # Make plots for all activities
+        all_plots[ALL_ACTIVITIES] = plot_graph(compact_activities, yaxis_title)
+
+        # Make plots for specific activities
+        for activity_type in activity_types:
+            all_plots[activity_type] = plot_graph(
+                list(
+                    filter(
+                        lambda activity: activity.type == activity_type,
+                        compact_activities,
+                    )
+                ),
+                yaxis_title,
+            )
+
+        data = get_figure_data_from_all_activity_data(all_plots)
+        layout = get_layout_from_all_activity_data(
+            all_plots,
+            yaxis_title=yaxis_title,
+            plot_title_creator=plot_title_creator,
+        )
+
+        fig = go.Figure(data=data, layout=layout)
+        return fig
+
+    return plot
 
 
 def get_compact_activities(
+    activity_attribute_name: str,
     activity_iterator: Iterator[Activity],
+    conversion_function: Callable[[Any], Any],
 ) -> list[CompactActivity]:
     return [
         CompactActivity(
             type=activity.type,
             start_date_local=activity.start_date_local,
-            distance=activity.distance,
+            activity_attribute=conversion_function(
+                getattr(activity, activity_attribute_name)
+            ),
         )
         for activity in activity_iterator
-        if activity.start_date_local is not None and activity.distance is not None
+        if activity.start_date_local is not None
+        and getattr(activity, activity_attribute_name) is not None
     ]
 
 
 def plot_graph(
-    activities: list[CompactActivity],
+    activities: list[CompactActivity], yaxis_title: str
 ) -> dict[int, go.Scatter]:
     graph_data: dict[int, list[float]] = {}
     for activity in activities:
         activity_datetime = activity.start_date_local
         year = activity_datetime.year
         year_data = graph_data.get(year, [0.0] * 366)
-        year_data[activity_datetime.timetuple().tm_yday - 1] += uh.kilometers(
-            activity.distance
-        ).magnitude
+        year_data[
+            activity_datetime.timetuple().tm_yday - 1
+        ] += activity.activity_attribute
         graph_data[year] = year_data
 
     for year, year_data in graph_data.items():
@@ -96,7 +121,7 @@ def plot_graph(
                 for i in range(len(year_data))
             ),
             hovertemplate="<b>Date: %{customdata|%d %b %Y}</b><br>"
-            + "<b>Kilometers</b>: %{y:.0f}<br>",
+            + f"<b>{yaxis_title}</b>: %{{y:.0f}}<br>",
         )
 
     return dd
@@ -104,9 +129,9 @@ def plot_graph(
 
 def get_title_for_activity_type(activity_type: Optional[str]) -> str:
     if activity_type:
-        return f"Cumulative Distance Travelled During {activity_type} Activities"
+        return f"Cumulative Time Spent on {activity_type} Activities"
     else:
-        return "Distance Logged on Strava by Year"
+        return "Time Logged on Strava by Year"
 
 
 def get_figure_data_from_all_activity_data(
@@ -124,7 +149,9 @@ def get_figure_data_from_all_activity_data(
 
 
 def get_layout_from_all_activity_data(
-    all_data: dict[ActivityType, dict[int, go.Scatter]]
+    all_data: dict[ActivityType, dict[int, go.Scatter]],
+    yaxis_title: str,
+    plot_title_creator: Callable[[str], str],
 ) -> dict[str, Any]:
     updatemenus = list(
         [
@@ -145,9 +172,7 @@ def get_layout_from_all_activity_data(
                             method="update",
                             args=[
                                 {"visible": get_visible_array(all_data, activity_type)},
-                                {
-                                    "title": f"Cumulative Distance Travelled During {activity_type} Activities"
-                                },
+                                {"title": plot_title_creator(activity_type)},
                             ],
                         )
                         for activity_type, _ in all_data.items()
@@ -158,11 +183,11 @@ def get_layout_from_all_activity_data(
     )
 
     layout = dict(
-        title=f"Cumulative Distance Travelled During {ALL_ACTIVITIES} Activities",
+        title=plot_title_creator(ALL_ACTIVITIES),
         title_x=0.5,
         updatemenus=updatemenus,
         xaxis_title="Date",
-        yaxis_title="Kilometers",
+        yaxis_title=yaxis_title,
         xaxis=dict(
             tickmode="array",
             tickvals=[1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335],
@@ -199,10 +224,63 @@ def get_visible_array(
     return visibility_list
 
 
+def conversion_function_for_timedeltas(attribute_value: dt.timedelta) -> float:
+    """
+    Takes the moving_time timedelta and converts it to a float that represents
+    hours.
+    """
+    return attribute_value.total_seconds() / 3600
+
+
+def conversion_function_for_distance_to_km(attribute_value: uh.Quantity) -> uh.Quantity:
+    """
+    Converts a uh.Quantity representing meters into a float representing
+    kilometers.
+    """
+    return uh.kilometers(attribute_value)
+
+
+def conversion_function_for_distance_to_m(attribute_value: uh.Quantity) -> uh.Quantity:
+    """
+    Converts a uh.Quantity representing meters into a float representing
+    meters.
+    """
+    return uh.meters(attribute_value)
+
+
+def conversion_function_for_int(attribute_value: int) -> float:
+    """
+    The most boring conversion function. It does nothing.
+    """
+    return float(attribute_value)
+
+
+def get_title_for_cumulative_time_plot(activity_type: str) -> str:
+    return f"Cumulative Time Spent on {activity_type} Activities"
+
+
+def get_title_for_cumulative_distance_plot(activity_type: str) -> str:
+    return f"Cumulative Distance Travelled During {activity_type} Activities"
+
+
+def get_title_for_cumulative_elevation_plot(activity_type: str) -> str:
+    return f"Cumulative Elevation Climbed During {activity_type} Activities"
+
+
+def get_title_for_cumulative_kudos_plot(activity_type: str) -> str:
+    return f"Cumulative Kudos Achieved During {activity_type} Activities"
+
+
 # For testing
 if __name__ == "__main__":
     from active_statistics.utils import local_storage
 
     activity_iterator = local_storage.get_activity_iterator(94896104)
-    f = plot(activity_iterator)
-    f.show()
+    plot_function = get_plot_function(
+        "moving_time",
+        conversion_function_for_timedeltas,
+        "Hours",
+        get_title_for_cumulative_time_plot,
+    )
+    fig = plot_function(activity_iterator)
+    fig.show()

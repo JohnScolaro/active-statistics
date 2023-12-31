@@ -1,10 +1,9 @@
 from active_statistics.statistics.images import polyline_grid, polyline_overlay
 from active_statistics.statistics.plots import (
     average_heartrate_by_average_speed,
-    cumulative_distance_travelled,
+    cumulative_anything,
     cumulative_gear_distance,
     cumulative_gear_time,
-    cumulative_time_spent,
     github_style_activities,
     histogram_of_activity_time,
     pace_timeline,
@@ -29,16 +28,51 @@ from active_statistics.tabs.trivia_tabs import TriviaTab
 cumulative_time_tab = PlotTab(
     name="Cumulative Time",
     description="A cumulative plot of how much time you've logged on Strava for each of your activity types.",
-    plot_function=cumulative_time_spent.plot,
+    plot_function=cumulative_anything.get_plot_function(
+        "moving_time",
+        cumulative_anything.conversion_function_for_timedeltas,
+        "Hours",
+        cumulative_anything.get_title_for_cumulative_time_plot,
+    ),
     detailed=False,
 )
 
-cumululative_distance_tab = PlotTab(
+cumulative_distance_tab = PlotTab(
     name="Cumulative Distance",
     description="A cumulative plot of the total distance you've travelled from the activities that you've logged on Strava.",
-    plot_function=cumulative_distance_travelled.plot,
+    plot_function=cumulative_anything.get_plot_function(
+        "distance",
+        cumulative_anything.conversion_function_for_distance_to_km,
+        "Kilometers",
+        cumulative_anything.get_title_for_cumulative_distance_plot,
+    ),
     detailed=False,
 )
+
+cumulative_elevation_tab = PlotTab(
+    name="Cumulative Elevation",
+    description="A cumulative plot of the total elevation you've climbed from the activities that you've logged on Strava.",
+    plot_function=cumulative_anything.get_plot_function(
+        "total_elevation_gain",
+        cumulative_anything.conversion_function_for_distance_to_m,
+        "Meters",
+        cumulative_anything.get_title_for_cumulative_elevation_plot,
+    ),
+    detailed=False,
+)
+
+cumulative_kudos_tab = PlotTab(
+    name="Cumulative Kudos",
+    description="A cumulative plot of the total kudos you've received each year.",
+    plot_function=cumulative_anything.get_plot_function(
+        "kudos_count",
+        cumulative_anything.conversion_function_for_int,
+        "Kudos",
+        cumulative_anything.get_title_for_cumulative_kudos_plot,
+    ),
+    detailed=False,
+)
+
 
 calendar_tab = PlotTab(
     name="Calendar",
