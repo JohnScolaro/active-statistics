@@ -76,15 +76,17 @@ class TableTab(Tab):
             else:
                 return None
 
-        column_types = self.get_table_column_types()
-        for col in df.columns:
-            if column_types.get(col, "string") == "link":
-                df[col] = df[col].apply(serialise_linkcells)
+        columns = self.get_columns(df)
+        for column_dict in columns:
+            column_name = column_dict["column_name"]
+            column_type = column_dict["column_type"]
+            if column_type == "link":
+                df[column_name] = df[column_name].apply(serialise_linkcells)
 
         return {
             "table_data": df.to_dict(orient="list"),
             "show_headings": self.has_column_headings(),
-            "columns": self.get_columns(df),
+            "columns": columns,
         }
 
     def get_type(self) -> str:
