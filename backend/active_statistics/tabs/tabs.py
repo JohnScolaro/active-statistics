@@ -1,3 +1,4 @@
+import traceback
 from abc import ABC, abstractmethod
 from typing import Any, Iterator, Optional
 
@@ -52,6 +53,7 @@ class Tab(ABC):
 
             except Exception as e:
                 print(e)
+                traceback.print_exc()
                 response_msg["status"] = "Failure"
 
             return make_response(jsonify(response_msg))
