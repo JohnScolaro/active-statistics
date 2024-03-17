@@ -1,6 +1,7 @@
 """
 This file will house all the code that interacts with redis.
 """
+
 import datetime as dt
 from typing import Optional
 

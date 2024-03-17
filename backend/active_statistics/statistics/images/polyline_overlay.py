@@ -44,9 +44,9 @@ def create_images(activity_iterator: Iterator[Activity], path: str) -> None:
         image.save(image_path, "PNG")
         image.close()
 
-        captions[
-            image_name
-        ] = f"All {activity_type} activities overlaid as if they have the same starting point."
+        captions[image_name] = (
+            f"All {activity_type} activities overlaid as if they have the same starting point."
+        )
 
         gif_duration_ms = 3000
         gif_fps = 20
