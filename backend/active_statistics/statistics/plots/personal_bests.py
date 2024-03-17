@@ -1,6 +1,7 @@
 """
 Plot your personal bests over time.
 """
+
 import dataclasses
 import datetime as dt
 from collections import defaultdict

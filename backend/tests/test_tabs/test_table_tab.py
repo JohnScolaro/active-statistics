@@ -8,7 +8,7 @@ from active_statistics.utils.environment_variables import EnvironmentVariableMan
 
 
 # Test that when data for trivia tabs is processed, when S3 is used, that the data is dumped to a json correctly.
-@moto.mock_s3
+@moto.mock_aws
 def test_min_and_max_distance_activities_table_tab(some_basic_runs_and_rides):
     # Create the bucket since this is happening in the moto 'virtual' aws account.
     s3 = boto3.client("s3", region_name="ap-southeast-2")
@@ -37,7 +37,7 @@ def test_min_and_max_distance_activities_table_tab(some_basic_runs_and_rides):
 
 
 # Test that when data for trivia tabs is processed, when S3 is used, that the data is dumped to a json correctly.
-@moto.mock_s3
+@moto.mock_aws
 def test_top_hundred_table_tab(some_basic_runs_and_rides):
     # Create the bucket since this is happening in the moto 'virtual' aws account.
     s3 = boto3.client("s3", region_name="ap-southeast-2")

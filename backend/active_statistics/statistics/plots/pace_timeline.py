@@ -4,6 +4,7 @@ that you're getting faster.
 
 TODO: Marker color proportional to length of activity.
 """
+
 import dataclasses
 import datetime as dt
 import math
@@ -47,12 +48,12 @@ def plot(activity_iterator: Iterator[Activity]) -> go.Figure:
     data_scatters: list[tuple[ActivityType, go.Scatter]] = get_data_scatters(
         ordered_activities
     )
-    moving_average_scatters: list[
-        tuple[ActivityType, go.Scatter]
-    ] = get_moving_average_scatters(ordered_activities, weighted=False)
-    weighted_moving_average_scatters: list[
-        tuple[ActivityType, go.Scatter]
-    ] = get_moving_average_scatters(ordered_activities, weighted=True)
+    moving_average_scatters: list[tuple[ActivityType, go.Scatter]] = (
+        get_moving_average_scatters(ordered_activities, weighted=False)
+    )
+    weighted_moving_average_scatters: list[tuple[ActivityType, go.Scatter]] = (
+        get_moving_average_scatters(ordered_activities, weighted=True)
+    )
 
     layout = {
         "title": "Pace Timeline",

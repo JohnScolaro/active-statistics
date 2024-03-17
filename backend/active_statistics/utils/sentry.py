@@ -1,6 +1,7 @@
 """
 Handle the setup of Sentry to monitor all my bugs
 """
+
 import sentry_sdk
 from active_statistics.utils.environment_variables import evm
 from sentry_sdk.integrations.flask import FlaskIntegration

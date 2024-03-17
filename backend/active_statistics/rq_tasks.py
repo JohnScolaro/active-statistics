@@ -40,7 +40,9 @@ def get_and_process_summary_statistics(athlete_id: int) -> None:
     save_summary_activities_to_file(athlete_id, summary_activities)
 
     process_activities(athlete_id, detailed=False)
-    delete_athlete_storage_location(athlete_id)
+
+    if evm.use_s3():
+        delete_athlete_storage_location(athlete_id)
 
 
 def get_and_process_detailed_statistics(athlete_id: int) -> None:
@@ -57,7 +59,9 @@ def get_and_process_detailed_statistics(athlete_id: int) -> None:
     )
 
     process_activities(athlete_id, detailed=True)
-    delete_athlete_storage_location(athlete_id)
+
+    if evm.use_s3():
+        delete_athlete_storage_location(athlete_id)
 
 
 def get_and_save_detailed_activities(

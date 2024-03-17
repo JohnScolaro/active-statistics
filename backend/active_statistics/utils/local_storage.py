@@ -1,6 +1,7 @@
 """
 This file contains all functions to do with data storage.
 """
+
 import os
 import pickle
 import shutil
@@ -110,8 +111,8 @@ def get_summary_activity_iterator(athlete_id: int) -> Iterator[Activity]:
     if os.path.isfile(activity_file):
         with open(activity_file, "rb") as fp:
             activities = pickle.load(fp)
-    for activity in activities:
-        yield activity
+            for activity in activities:
+                yield activity
 
 
 def we_have_summary_activities_for_athlete(athlete_id: int) -> bool:
