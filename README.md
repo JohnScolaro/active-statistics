@@ -33,6 +33,14 @@ The ENTIRE infrastructure stack isn't defined in the `template.yaml` though, sim
 
 Since traffic for this website is ~3 people / week, this sets the website permanently in the free tier, and allows me to host it.
 
+If you're setting up this pipeline by hand from nothing, the main catches are:
+
+1. You'll need to manually create the S3 frontend bucket in AWS with the name specified in deploy.yaml.
+2. You'll need to manually create the ECR repo in AWS with the name specified in deploy.yaml.
+3. You'll need to set up Github OIDC with AWS and give the role that GitHub actions assumes enough permissions to run `sam deploy`. It will need permissions to deploy everything in the template.yaml, which is quite a lot.
+4. You'll need a bunch of secrets to put into GitHub secrets. Go to deploy.yaml, and ctrl+f "secrets" and you'll see what you need.
+5. Comb through template.yaml and replace anything hardcoded. The AcmCertificateArn for cloudfront will obviously need to be replaced with your own domain, because active-statistics.com is mine.
+
 ## Testing
 
 This repo has a bunch of backend tests using pytest. If you're using VSCode the `settings.json` file should direct the IDE to the correct location. Otherwise you can run manually with `pytest backend/tests`.

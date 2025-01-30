@@ -16,7 +16,7 @@ env:
   PROD_ARTIFACTS_BUCKET: active-statistics-sam-app-artifacts-bucket
   PROD_IMAGE_REPOSITORY: 018760403092.dkr.ecr.ap-southeast-2.amazonaws.com/active-statistics-sam-app/lambda-images
   PROD_REGION: ap-southeast-2
-  PROD_FRONTEND_BUCKET: active-statistics-sam-app-frontendbucket
+  PROD_FRONTEND_BUCKET: active-statistics-sam-app-frontendbucket-oh5hjcjotrrx
 
 jobs:
   deploy:
