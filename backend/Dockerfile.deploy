@@ -1,0 +1,14 @@
+FROM public.ecr.aws/lambda/python:3.13
+COPY . /home/backend
+WORKDIR /home/backend
+
+# Install system-level dependencies (These are needed for the pip install of numpy later)
+RUN dnf install -y gcc gcc-c++ make
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+# Install dependencies. Root user action just silences the warning you get because pip wants you to make a virtual environment.
+RUN pip install -e . --root-user-action=ignore
+
+CMD ["backend.main.handler"]

@@ -1,0 +1,120 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - "master"
+
+permissions:
+  id-token: write # Required for OIDC authentication
+  contents: read # To allow access to repository contents
+
+env:
+  SAM_TEMPLATE: template.yaml
+  STACK_NAME: sam-app
+  PROD_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::018760403092:role/aws-sam-cli-managed-stage-CloudFormationExecutionRo-mWWs0KVTI38S
+  PROD_ARTIFACTS_BUCKET: aws-sam-cli-managed-default-samclisourcebucket-wavfhz8jbkag
+  PROD_IMAGE_REPOSITORY: 018760403092.dkr.ecr.ap-southeast-2.amazonaws.com/samapp7427b055/appfunction10acf256repo
+  PROD_REGION: ap-southeast-2
+  PROD_FRONTEND_BUCKET: sam-app-frontendbucket-hh39pzlngdhh
+
+jobs:
+  deploy:
+    name: Deploy Backend and Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create backend .env file
+        run: |
+          echo "PROTOCOL=${{ vars.PROTOCOL }}" >> backend/.env
+          echo "DOMAIN=${{ vars.DOMAIN }}" >> backend/.env
+          echo "FRONTEND_PORT=${{ vars.FRONTEND_PORT }}" >> backend/.env
+          echo "BACKEND_PORT=${{ vars.BACKEND_PORT }}" >> backend/.env
+          echo "ENVIRONMENT=${{ vars.ENVIRONMENT }}" >> backend/.env
+          echo "STRAVA_CLIENT_ID=${{ secrets.STRAVA_CLIENT_ID }}" >> backend/.env
+          echo "STRAVA_CLIENT_SECRET=${{ secrets.STRAVA_CLIENT_SECRET }}" >> backend/.env
+          echo "SENTRY_SERVER_DSN=${{ secrets.SENTRY_SERVER_DSN }}" >> backend/.env
+
+      - name: Create frontend .env file
+        run: |
+          echo "NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL }}" >> frontend/.env
+          echo "SENTRY_AUTH_TOKEN=${{ vars.SENTRY_AUTH_TOKEN }}" >> frontend/.env
+
+      - name: Setup AWS SAM
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Build resources
+        run: sam build --template ${SAM_TEMPLATE} --use-container
+
+      - name: Assume the pipeline user role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT_ID}}:role/${{secrets.GH_CD_DEPLOY_ROLE_NAME}}
+          role-session-name: packaging
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+
+      - name: Upload artifacts to production artifact buckets
+        run: |
+          sam package \
+            --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
+            --image-repository ${PROD_IMAGE_REPOSITORY} \
+            --region ${PROD_REGION} \
+            --output-template-file packaged-prod.yaml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packaged-prod.yaml
+          path: packaged-prod.yaml
+
+      - name: Deploy to production account
+        run: |
+          sam deploy --stack-name ${STACK_NAME} \
+            --template packaged-prod.yaml \
+            --capabilities CAPABILITY_IAM \
+            --region ${PROD_REGION} \
+            --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
+            --image-repository ${PROD_IMAGE_REPOSITORY} \
+            --no-fail-on-empty-changeset \
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        # Clean install of all dependencies
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Sync Frontend to S3
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws s3 sync frontend/out/ s3://${PROD_FRONTEND_BUCKET} --delete
+
+      - name: Retrieve CloudFront Distribution ID
+        id: get-distribution-id
+        run: |
+          export DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name ${STACK_NAME} \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+            --output text)
+          echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_ENV
+
+      # Invalidate CloudFront cache
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.distribution_id }} \
+            --paths "/*"

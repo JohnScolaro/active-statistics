@@ -3,12 +3,19 @@ import datetime as dt
 import factory
 from factory.faker import Faker
 from factory.fuzzy import FuzzyChoice, FuzzyDateTime, FuzzyFloat, FuzzyInteger
-from stravalib.model import Athlete
+from stravalib.model import MetaAthlete, SummaryAthlete
+
+
+class MetaAthleteFactory(factory.Factory):
+    class Meta:
+        model = MetaAthlete
+
+    id: int = FuzzyInteger(1, 999_999)
 
 
 class AthleteFactory(factory.Factory):
     class Meta:
-        model = Athlete
+        model = SummaryAthlete
 
     id: int = FuzzyInteger(1, 999_999)
     resource_state = None

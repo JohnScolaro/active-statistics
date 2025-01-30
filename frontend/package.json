@@ -3,33 +3,41 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start -p 3000",
-    "lint": "next lint"
+    "dev": "cp .env.loc .env.local && next dev --turbopack",
+    "build": "cp .env.prod .env.local && next build",
+    "start": "cp .env.loc .env.local && next start",
+    "lint": "cp .env.loc .env.local && next lint"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.13",
-    "@mui/material": "^5.14.13",
-    "cookies-next": "^4.0.0",
-    "next": "latest",
-    "plotly.js": "^2.26.1",
-    "react": "latest",
-    "react-dom": "latest",
-    "react-plotly.js": "^2.6.0"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mapbox/polyline": "^1.2.1",
+    "@mui/icons-material": "^6.3.0",
+    "@mui/material": "^6.3.0",
+    "@sentry/nextjs": "^8.51.0",
+    "cookies-next": "^5.0.2",
+    "next": "^15.1.5",
+    "plotly.js": "^2.35.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-plotly.js": "^2.6.0",
+    "react-select": "^5.9.0"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@types/react-plotly.js": "^2.6.1",
-    "autoprefixer": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
-    "postcss": "latest",
-    "tailwindcss": "latest",
-    "typescript": "latest"
+    "@eslint/eslintrc": "^3",
+    "@types/mapbox__polyline": "^1.0.5",
+    "@types/node": "^20",
+    "@types/react": "19.0.4",
+    "@types/react-dom": "19.0.2",
+    "@types/react-plotly.js": "^2.6.3",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "@types/react": "19.0.4",
+    "@types/react-dom": "19.0.2"
   }
 }

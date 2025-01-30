@@ -1,217 +1,106 @@
 "use client";
 
-import SideBar from "@/components/side_bar/side_bar";
-import TopBar from "@/components/top_bar";
+import SideBar from "../components/side_bar/side_bar";
+import TopBar from "../components/top_bar";
 import { useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
-import { wrappedFetch } from "@/lib/fetch";
+import { wrappedFetch } from "../lib/fetch";
 
 interface DataStatus {
   message: string;
-  status: string;
-  stopPolling: boolean;
+  downloaded: boolean;
 }
 
 interface HomeContextType {
-  detailedDataStatus: DataStatus;
-  summaryDataStatus: DataStatus;
-  paidUser: {
-    paid: boolean;
-  };
+  dataStatus: DataStatus;
   setDisabledSidebarSteps: (disabledSidebarSteps: string[]) => void;
-  setSummaryDataStatus: (dataStatus: DataStatus) => void;
-  setDetailedDataStatus: (dataStatus: DataStatus) => void;
+  setDataStatus: (dataStatus: DataStatus) => void;
 }
 
 export const HomeContext = createContext<HomeContextType>({
-  detailedDataStatus: {
+  dataStatus: {
     message: "Data status unknown...",
-    status: "unknown",
-    stopPolling: false,
+    downloaded: false,
   },
-  summaryDataStatus: {
-    message: "Data status unknown...",
-    status: "unknown",
-    stopPolling: false,
-  },
-  paidUser: {
-    paid: false,
-  },
-  setDisabledSidebarSteps: (disabledSidebarSteps) => {},
-  setSummaryDataStatus: (dataStatus) => {},
-  setDetailedDataStatus: (dataStatus) => {},
+  setDisabledSidebarSteps: (disabledSidebarSteps) => console.log(disabledSidebarSteps),
+  setDataStatus: (dataStatus) => console.log(dataStatus),
 });
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  /* Initially all buttons are disabled */
-  const [disabledSidebarSteps, setDisabledSidebarSteps] = useState([
-    "summary_data",
-    "detailed_data",
-  ]);
+  const [disabledSidebarSteps, setDisabledSidebarSteps] = useState(["visualisations"]);
+  const [dataStatus, setDataStatus] = useState<DataStatus>({
+    message: "Data status unknown...",
+    downloaded: false,
+  });
 
-  const [summaryDataStatus, setSummaryDataStatus] = useState({
-    message: "Data status unknown...",
-    status: "unknown",
-    stopPolling: false,
-  });
-  const [detailedDataStatus, setDetailedDataStatus] = useState({
-    message: "Data status unknown...",
-    status: "unknown",
-    stopPolling: false,
-  });
-  const [paidUser, setPaidUser] = useState({ paid: false });
+  const router = useRouter();
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+    if (!apiUrl) {
+      console.error("API base URL is not defined");
+      return;
+    }
+
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const pollDataStatus = () => {
+      wrappedFetch(
+        `${apiUrl}/api/data_status`,
+        (data: DataStatus) => {
+          console.log("Data status fetched:", data);
+          setDataStatus(data);
+
+          if (data.downloaded) {
+            setDisabledSidebarSteps([]);
+            if (intervalId) {
+              clearInterval(intervalId); // Stop polling
+              intervalId = null;
+            }
+          }
+        },
+        (error: any) => {
+          console.error("Error fetching data status:", error);
+        },
+        router
+      );
+    };
+
+    intervalId = setInterval(pollDataStatus, 3000); // Poll every 3 seconds
+    pollDataStatus(); // Initial fetch
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId); // Cleanup interval on unmount
+      }
+    };
+  }, [router]);
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const router = useRouter();
-
-  function pollDataStatus(
-    type: "detailed" | "summary",
-    callback?: (status: any) => void
-  ) {
-    // If polling has finished, the callback is called.
-    if (type == "detailed") {
-      var url = "/api/detailed_data_status";
-    } else if (type == "summary") {
-      var url = "/api/summary_data_status";
-    } else {
-      throw new Error("Unknown type of data to query recieved.");
-    }
-
-    const setDataStatus =
-      type == "summary" ? setSummaryDataStatus : setDetailedDataStatus;
-
-    wrappedFetch(
-      url,
-      (data) => {
-        updateDisabledSidebarSteps(type, data.status, setDisabledSidebarSteps);
-        setDataStatus(data);
-        if (!data.stop_polling) {
-          // If stopPolling is not true, poll again after 2 seconds
-          setTimeout(() => pollDataStatus(type, callback), 2000);
-        } else {
-          if (callback) {
-            callback(data.status);
-          }
-        }
-      },
-      (err) => {
-        console.log("oopsie, an error happened.");
-      },
-      router
-    );
-  }
-
-  function updateDisabledSidebarSteps(
-    type: "summary" | "detailed",
-    status: string,
-    setDisabledSidebarSteps: (updater: (prevSteps: string[]) => string[]) => void
-  ) {
-    const sidebarKey = type === "summary" ? "summary_data" : "detailed_data";
-
-    setDisabledSidebarSteps((prevDisabledSidebarSteps: string[]) => {
-      if (status === "finished" && prevDisabledSidebarSteps.includes(sidebarKey)) {
-        return prevDisabledSidebarSteps.filter((item) => item !== sidebarKey);
-      } else if (
-        status !== "finished" &&
-        !prevDisabledSidebarSteps.includes(sidebarKey)
-      ) {
-        return [...prevDisabledSidebarSteps, sidebarKey];
-      } else {
-        return prevDisabledSidebarSteps; // No changes needed
-      }
-    });
-  }
-
-  function getPaidStatus() {
-    wrappedFetch(
-      "/api/paid",
-      (data) => {
-        setPaidUser(data);
-      },
-      (err) => {
-        console.log(
-          "An unhandled error occurred while fetching whether or not the user is paid."
-        );
-      },
-      router
-    );
-  }
-
-  useEffect(() => {
-    getPaidStatus();
-  }, []);
-
-  useEffect(() => {
-    if (summaryDataStatus.stopPolling == false) {
-      pollDataStatus("summary", (status) => {
-        // If we finish polling, and the status is null, the only way that can
-        // happen is if we haven't ever gotten data for this user before. In
-        // this case, we want to kick off data downloading, and continue
-        // polling.
-        if (status == null) {
-          const url = "/api/refresh_summary_data";
-
-          wrappedFetch(
-            url,
-            (data) => {
-              if (data.refresh_accepted) {
-                setSummaryDataStatus({
-                  message: "Attempting to refresh data.",
-                  status: "",
-                  stopPolling: false,
-                });
-                pollDataStatus("summary");
-              } else {
-                setSummaryDataStatus({
-                  message: data.message,
-                  status: "too_recent",
-                  stopPolling: true,
-                });
-              }
-            },
-            () => {},
-            router
-          );
-        }
-      });
-    }
-  }, [summaryDataStatus.stopPolling]);
-
-  useEffect(() => {
-    if (detailedDataStatus.stopPolling == false) {
-      pollDataStatus("detailed");
-    }
-  }, [detailedDataStatus.stopPolling]);
-
   return (
-    <>
-      <HomeContext.Provider
-        value={{
-          summaryDataStatus,
-          detailedDataStatus,
-          paidUser,
-          setDisabledSidebarSteps,
-          setSummaryDataStatus,
-          setDetailedDataStatus,
-        }}
-      >
-        <TopBar sidebarVisible={sidebarVisible} toggleSidebar={toggleSidebar} />
-        <div className="flex flex-row p-2 gap-2 grow overflow-auto">
-          <SideBar
-            sidebarVisible={sidebarVisible}
-            toggleSidebar={toggleSidebar}
-            disabledSidebarSteps={disabledSidebarSteps}
-          />
-          {/* Content */}
-          <div className="flex bg-white rounded-lg p-2 overflow-auto grow justify-center">
-            {children}
-          </div>
+    <HomeContext.Provider
+      value={{
+        dataStatus,
+        setDisabledSidebarSteps,
+        setDataStatus,
+      }}
+    >
+      <TopBar sidebarVisible={sidebarVisible} toggleSidebar={toggleSidebar} />
+      <div className="flex flex-row p-2 gap-2 grow overflow-auto">
+        <SideBar
+          sidebarVisible={sidebarVisible}
+          toggleSidebar={toggleSidebar}
+          disabledSidebarSteps={disabledSidebarSteps}
+        />
+        <div className="flex bg-white rounded-lg p-2 overflow-auto grow justify-center">
+          {children}
         </div>
-      </HomeContext.Provider>
-    </>
+      </div>
+    </HomeContext.Provider>
   );
 }

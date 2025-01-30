@@ -1,0 +1,171 @@
+Transform: AWS::Serverless-2016-10-31
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  AppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      CodeUri: app/
+      Timeout: 300 # Set timeout to 5 mins instead of the default 3 seconds.
+      MemorySize: 256 # Set Lambda memory usage to 256MB instead of default 128MB.
+      Events:
+        Root:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId:
+              Ref: MyRegionalApi
+        NonRoot:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId:
+              Ref: MyRegionalApi
+      Policies:
+        - AWSLambda_ReadOnlyAccess # Grants permissions to list functions
+        - AWSLambdaRole # Grants permission to invoke lambdas
+        - AmazonS3FullAccess # Ability to read and write from s3
+        - AmazonDynamoDBFullAccess # Ability to read and write from dynamoDB
+    Metadata:
+      Dockerfile: Dockerfile.deploy
+      DockerContext: ./backend
+      DockerTag: backend-container
+      DockerBuildArgs: {}
+
+  MyRegionalApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: MyRegionalApiName
+      EndpointConfiguration: REGIONAL
+      StageName: Prod
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: CloudFront access identity
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+            Action: "s3:GetObject"
+            Resource: !Sub
+              - "arn:aws:s3:::${Bucket}/*"
+              - Bucket: !Ref FrontendBucket
+      Bucket: !Ref FrontendBucket
+
+  CloudFrontFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: s3-url-redirect
+      FunctionConfig:
+        Comment: "CloudFront Function to redirect responses from example.com/blah to example.com/blah.html for s3 reasons."
+        Runtime: cloudfront-js-2.0
+      FunctionCode: 
+        Fn::Sub: |
+          function handler(event) {
+              var request = event.request;
+              var uri = request.uri;
+
+              // Check if the URI does not end with '/' and does not have a file extension
+              if (!uri.endsWith('/') && !uri.includes('.')) {
+                  // Append '.html' to the URI
+                  request.uri += '.html';
+              }
+
+              // Return the modified request object
+              return request;
+          }
+      AutoPublish: true
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - "test.active-statistics.com"
+        ViewerCertificate:
+          AcmCertificateArn: "arn:aws:acm:us-east-1:018760403092:certificate/a2fc8dab-7d67-4bab-a0b4-46c56b3f7043"
+          SslSupportMethod: sni-only
+        Origins:
+          - DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            Id: FrontendBucket
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+          - DomainName: !Sub "${MyRegionalApi}.execute-api.${AWS::Region}.amazonaws.com"
+            Id: Backend
+            OriginPath: "/Prod"
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          TargetOriginId: FrontendBucket
+          ViewerProtocolPolicy: redirect-to-https
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt CloudFrontFunction.FunctionMetadata.FunctionARN
+          ForwardedValues:
+            QueryString: true
+        CacheBehaviors:
+          - TargetOriginId: Backend
+            PathPattern: "/api/*"
+            DefaultTTL: 0
+            MinTTL: 0
+            MaxTTL: 0
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+            CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # Managed-CachingDisabled
+            OriginRequestPolicyId: "b689b0a8-53d0-40ab-baf2-68738e2966ac" # Managed-AllViewerExceptHostHeader
+        Enabled: true
+        DefaultRootObject: index.html
+
+  TestAthleteDataStorage:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: athlete-data-storage
+
+  DownloadStatusTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: download-status-table
+      AttributeDefinitions:
+        - AttributeName: athlete_id
+          AttributeType: N
+      KeySchema:
+        - AttributeName: athlete_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  UserTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: user-table
+      AttributeDefinitions:
+        - AttributeName: session_token
+          AttributeType: S
+      KeySchema:
+        - AttributeName: session_token
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      
+Outputs:
+  Website:
+    Description: The domain name of the CloudFront distribution
+    Value: !GetAtt CloudFrontDistribution.DomainName
+
+  CloudFrontDistributionId:
+    Description: The ID of the CloudFront distribution
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: CloudFrontDistributionId

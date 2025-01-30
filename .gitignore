@@ -1,8 +1,16 @@
+# Python things
 .venv*
-!examples/*
 __pycache__
 .pytest_cache
 .mypy_cache
-tmp_storage
 *.egg-info
 build
+.ruff_cache
+
+reference_pipeline.yaml
+.aws-sam*
+samconfig.toml
+
+# Env files
+*.env
+*.*env

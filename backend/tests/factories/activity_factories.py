@@ -5,25 +5,25 @@ import factory
 from factory import LazyAttribute
 from factory.fuzzy import FuzzyChoice, FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from faker import Faker
-from stravalib.model import Activity
-from stravalib.unithelper import Quantity
-from tests.factories.athlete_factories import AthleteFactory
-from tests.factories.gear_factories import GearFactory
+from stravalib.model import SummaryActivity
+from stravalib.unit_helper import _Quantity
+
+from tests.factories.athlete_factories import MetaAthleteFactory
 
 fake = Faker()
 
 
 class ActivityFactory(factory.Factory):
     class Meta:
-        model = Activity
+        model = SummaryActivity
 
     id = FuzzyInteger(1, 999_999_999)
     achievement_count = FuzzyInteger(0, 100)
-    athlete = AthleteFactory()
+    athlete = MetaAthleteFactory()
     athlete_count = FuzzyInteger(1, 10)
-    average_speed = LazyAttribute(lambda _: Quantity(random.uniform(1, 10), "m/s"))
+    average_speed = LazyAttribute(lambda _: _Quantity(random.uniform(1, 10)))
     average_heartrate = FuzzyFloat(80, 210)
-    average_watts = FuzzyFloat(1, 200)
+    average_watts = FuzzyInteger(1, 200)
     comment_count = FuzzyInteger(0, 10)
     commute = FuzzyChoice([True, False])
     device_watts = False
@@ -34,10 +34,10 @@ class ActivityFactory(factory.Factory):
     end_latlng = LazyAttribute(
         lambda _: tuple([float(fake.latitude()), float(fake.longitude())])
     )
-    external_id = FuzzyInteger(1, 999_999)
+    external_id = LazyAttribute(lambda _: str(FuzzyInteger(1, 999_999)))
     flagged = FuzzyChoice([True, False])
     gear_id = None
-    gear = GearFactory()
+    gear = None
     has_kudoed = None
     hide_from_home = None
     kilojoules = None
@@ -45,7 +45,7 @@ class ActivityFactory(factory.Factory):
     manual = None
     map = None
     max_speed = FuzzyFloat(1, 20)
-    max_watts = FuzzyFloat(1, 200)
+    max_watts = FuzzyInteger(1, 200)
     moving_time = FuzzyInteger(60, 2 * 60 * 60)
     name = LazyAttribute(lambda _: fake.text(max_nb_chars=30))
     photo_count = FuzzyInteger(0, 10)

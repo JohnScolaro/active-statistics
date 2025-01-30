@@ -1,0 +1,37 @@
+name: Format, Type Check, and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "release/**"
+
+jobs:
+  format_type_check_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      # Install everything.
+      - name: Install package and dependancies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./backend[dev]
+
+      - name: Run Ruff
+        run: |
+          ruff check ./backend
+          ruff format ./backend
+
+      - name: Run mypy
+        run: mypy ./backend --config-file ./backend/mypy.ini
+
+      - name: Run tests
+        run: |
+          set -a
+          source ./backend/envs/example.env
+          set +a
+          pytest ./backend
