@@ -253,33 +253,27 @@ async def data_status(
 ) -> JSONResponse:
     session_token = request.cookies["session_token"]
     athlete_id = get_athlete_id_from_session_token(user_table, session_token)
-
-    # Check if we have downloaded this users data before. If there is an item in this
-    # table, it's recent enough, because the TTL on the table is set to the timedelta
-    # for which we want to refresh old data.
     download_status_item = get_download_status_item_from_dynamo(
         download_status_table, athlete_id
     )
 
-    if download_status_item:
-        # If the last time the data was downloaded there was an error, delete any data
-        # and redownload it.
-        if download_status_item.error:
-            delete_athlete_data(s3_client, athlete_id)
-            trigger_download_data(session_token, background_tasks)
-            return {
-                "message": "Attempting to redownload data after an error.",
-                "downloaded": False,
-            }
-
-        else:
-            return {"message": "Data downloaded.", "downloaded": True}
-
-    else:
-        # If there is no download status item, then assume we have no data!
+    if not download_status_item:
         delete_athlete_data(s3_client, athlete_id)
         trigger_download_data(session_token, background_tasks)
         return {"message": "Starting data download...", "downloaded": False}
+
+    if download_status_item.error:
+        delete_athlete_data(s3_client, athlete_id)
+        trigger_download_data(session_token, background_tasks)
+        return {
+            "message": "Attempting to redownload data after an error.",
+            "downloaded": False,
+        }
+
+    if download_status_item.complete:
+        return {"message": "Data downloaded.", "downloaded": True}
+
+    return {"message": download_status_item.status, "downloaded": False}
 
 
 def trigger_download_data(
@@ -314,6 +308,7 @@ async def download_data_route(
             dt.datetime.now(dt.timezone.utc),
             "There was an error while trying to download your data. Please try again later.",
             error=True,
+            complete=True,
         )
         logger.error("Exception while trying to download data.")
         logger.exception(e)
@@ -331,6 +326,7 @@ def download_data(session_token: str) -> None:
         current_time_utc,
         status="Starting download.",
         error=False,
+        complete=False,
     )
 
     # Get required tokens.
@@ -355,6 +351,7 @@ def download_data(session_token: str) -> None:
                 dt.datetime.now(dt.timezone.utc),
                 f"{idx} activities downloaded so far.",
                 error=False,
+                complete=False,
             )
 
         i += 1
@@ -366,6 +363,7 @@ def download_data(session_token: str) -> None:
         dt.datetime.now(dt.timezone.utc),
         f"All {idx} activities downloaded.",
         error=False,
+        complete=False,
     )
     save_summary_activities_to_s3(s3_client, athlete_id, summary_activities)
     print(f"All {idx} activities saved to s3.")
@@ -375,6 +373,7 @@ def download_data(session_token: str) -> None:
         dt.datetime.now(dt.timezone.utc),
         f"All {idx} activities saved to s3.",
         error=False,
+        complete=True,
     )
 
 

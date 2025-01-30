@@ -23,6 +23,7 @@ class DownloadStatusItem(BaseModel):
     status: str
     ttl: dt.datetime
     error: bool
+    complete: bool
 
 
 def save_user_data_to_dynamo(
@@ -88,6 +89,7 @@ def save_download_status_to_dynamo(
     download_time: dt.datetime,
     status: str,
     error: bool,
+    complete: bool,
 ) -> None:
     try:
         # Use the attributes from the Pydantic model
@@ -97,13 +99,15 @@ def save_download_status_to_dynamo(
                 "SET last_download_time = :last_download_time, "
                 "status_message = :status_message, "
                 "time_to_live = :time_to_live, "
-                "download_error = :download_error"
+                "download_error = :download_error, "
+                "complete = :complete"
             ),
             ExpressionAttributeValues={
                 ":last_download_time": int(download_time.timestamp()),
                 ":status_message": status,
                 ":time_to_live": int(download_time.timestamp()) + TTL_TIME_IN_FUTURE,
                 ":download_error": error,
+                ":complete": complete,
             },
             ReturnValues="ALL_NEW",
         )
@@ -136,4 +140,5 @@ def get_download_status_item_from_dynamo(
             status=response["Item"]["status_message"],
             ttl=response["Item"]["time_to_live"],
             error=response["Item"]["download_error"],
+            complete=response["Item"]["complete"],
         )
