@@ -92,6 +92,7 @@ def test_save_data_status_to_dynamodb() -> None:
         dt.datetime(2020, 1, 2, tzinfo=dt.timezone.utc),
         "yeet",
         error=False,
+        complete=True,
     )
     request = data_status_table.get_item(Key={"athlete_id": 1})
     assert "Item" in request
@@ -143,6 +144,7 @@ def test_get_last_downloaded_status_item_from_dynamo() -> None:
         dt.datetime(2024, 1, 1, 1, 1, 1, tzinfo=dt.timezone.utc),
         "yeet",
         error=False,
+        complete=True,
     )
     download_status_row = get_download_status_item_from_dynamo(data_status_table, 1)
     assert download_status_row.athlete_id == 1
@@ -153,7 +155,8 @@ def test_get_last_downloaded_status_item_from_dynamo() -> None:
     assert download_status_row.ttl == dt.datetime(
         2024, 1, 1, 1, 1, 1, tzinfo=dt.timezone.utc
     ) + dt.timedelta(days=7)
-    assert download_status_row.error == False
+    assert not download_status_row.error
+    assert download_status_row.complete
 
 
 @mock_aws
