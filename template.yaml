@@ -95,7 +95,8 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-          - "test.active-statistics.com"
+          - "active-statistics.com"
+          - "www.active-statistics.com"
         ViewerCertificate:
           AcmCertificateArn: "arn:aws:acm:us-east-1:018760403092:certificate/a2fc8dab-7d67-4bab-a0b4-46c56b3f7043"
           SslSupportMethod: sni-only
