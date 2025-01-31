@@ -7,7 +7,7 @@ Resources:
       PackageType: Image
       CodeUri: app/
       Timeout: 300 # Set timeout to 5 mins instead of the default 3 seconds.
-      MemorySize: 256 # Set Lambda memory usage to 256MB instead of default 128MB.
+      MemorySize: 512 # Set Lambda memory usage to 512MB instead of default 128MB.
       Events:
         Root:
           Type: Api
