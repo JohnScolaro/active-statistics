@@ -16,7 +16,7 @@
     "@mui/material": "^6.3.0",
     "@sentry/nextjs": "^8.51.0",
     "cookies-next": "^5.0.2",
-    "next": "^15.1.5",
+    "next": "^15.1.6",
     "plotly.js": "^2.35.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
