@@ -336,7 +336,7 @@ def download_data(session_token: str) -> None:
     client = Client(access_token=row.access_token, rate_limiter=DefaultRateLimiter())
 
     summary_activities: list[SummaryActivity] = []
-    i = 1
+    i = 0
 
     # Iterate over the activities returned by the batched iterator
     for idx, activity in enumerate(client.get_activities(), start=1):
@@ -356,22 +356,22 @@ def download_data(session_token: str) -> None:
 
         i += 1
 
-    print(f"All {idx} activities downloaded.")
+    print(f"All {i} activities downloaded.")
     save_download_status_to_dynamo(
         download_status_table,
         athlete_id,
         dt.datetime.now(dt.timezone.utc),
-        f"All {idx} activities downloaded.",
+        f"All {i} activities downloaded.",
         error=False,
         complete=False,
     )
     save_summary_activities_to_s3(s3_client, athlete_id, summary_activities)
-    print(f"All {idx} activities saved to s3.")
+    print(f"All {i} activities saved to s3.")
     save_download_status_to_dynamo(
         download_status_table,
         athlete_id,
         dt.datetime.now(dt.timezone.utc),
-        f"All {idx} activities saved to s3.",
+        f"All {i} activities saved to s3.",
         error=False,
         complete=True,
     )
