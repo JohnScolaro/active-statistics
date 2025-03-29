@@ -270,6 +270,16 @@ async def data_status(
             "downloaded": False,
         }
 
+    # If we last downloaded over a week ago, delete and redownload new data.
+    threshold = download_status_item.last_download_time + dt.timedelta(weeks=1)
+    if dt.datetime.now(dt.timezone.utc) > threshold:
+        delete_athlete_data(s3_client, athlete_id)
+        trigger_download_data(session_token, background_tasks)
+        return {
+            "message": "Welcome back, downloading data.",
+            "downloaded": False,
+        }
+
     if download_status_item.complete:
         return {"message": "Data downloaded.", "downloaded": True}
 
@@ -306,7 +316,7 @@ async def download_data_route(
             download_status_table,
             get_athlete_id_from_session_token(user_table, session_token),
             dt.datetime.now(dt.timezone.utc),
-            "There was an error while trying to download your data. Please try again later.",
+            "There was an error while trying to download your data. Please try again later.",  # noqa: E501
             error=True,
             complete=True,
         )

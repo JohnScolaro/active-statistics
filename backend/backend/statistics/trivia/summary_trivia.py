@@ -325,7 +325,8 @@ class MostConsecutiveDaysOfActivities(TriviaTidbitBase):
         start_date = self.date_list[0]
         end_date = self.date_list[0]
 
-        # Initialize variables to track the start and end of the longest consecutive days
+        # Initialize variables to track the start and end of the longest consecutive
+        # days
         max_start_date = self.date_list[0]
         max_end_date = self.date_list[0]
 

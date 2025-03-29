@@ -35,7 +35,7 @@ def get_plot_function(
         )
 
         # Get set of all the different types of activities this person has logged.
-        activity_types = set(activity.type for activity in compact_activities)
+        activity_types = {activity.type for activity in compact_activities}
 
         all_plots: dict[ActivityType, dict[int, go.Scatter]] = {}
 
@@ -153,45 +153,41 @@ def get_layout_from_all_activity_data(
     yaxis_title: str,
     plot_title_creator: Callable[[str], str],
 ) -> dict[str, Any]:
-    updatemenus = list(
-        [
-            dict(
-                direction="left",
-                pad={"r": 10, "t": 10},
-                showactive=True,
-                x=0.5,
-                xanchor="center",
-                y=1.02,
-                yanchor="bottom",
-                type="buttons",
-                active=-1,
-                buttons=list(
-                    [
-                        dict(
-                            label=f"{activity_type}",
-                            method="update",
-                            args=[
-                                {"visible": get_visible_array(all_data, activity_type)},
-                                {"title": plot_title_creator(activity_type)},
-                            ],
-                        )
-                        for activity_type, _ in all_data.items()
-                    ]
-                ),
-            )
-        ]
-    )
+    updatemenus = [
+        {
+            "direction": "left",
+            "pad": {"r": 10, "t": 10},
+            "showactive": True,
+            "x": 0.5,
+            "xanchor": "center",
+            "y": 1.02,
+            "yanchor": "bottom",
+            "type": "buttons",
+            "active": -1,
+            "buttons": [
+                {
+                    "label": f"{activity_type}",
+                    "method": "update",
+                    "args": [
+                        {"visible": get_visible_array(all_data, activity_type)},
+                        {"title": plot_title_creator(activity_type)},
+                    ],
+                }
+                for activity_type, _ in all_data.items()
+            ],
+        }
+    ]
 
-    layout = dict(
-        title=plot_title_creator(ALL_ACTIVITIES),
-        title_x=0.5,
-        updatemenus=updatemenus,
-        xaxis_title="Date",
-        yaxis_title=yaxis_title,
-        xaxis=dict(
-            tickmode="array",
-            tickvals=[1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335],
-            ticktext=[
+    layout = {
+        "title": plot_title_creator(ALL_ACTIVITIES),
+        "title_x": 0.5,
+        "updatemenus": updatemenus,
+        "xaxis_title": "Date",
+        "yaxis_title": yaxis_title,
+        "xaxis": {
+            "tickmode": "array",
+            "tickvals": [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335],
+            "ticktext": [
                 "Jan",
                 "Feb",
                 "Mar",
@@ -205,8 +201,8 @@ def get_layout_from_all_activity_data(
                 "Nov",
                 "Dec",
             ],
-        ),
-    )
+        },
+    }
 
     return layout
 

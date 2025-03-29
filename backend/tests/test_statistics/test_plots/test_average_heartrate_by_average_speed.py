@@ -1,6 +1,6 @@
 import pytest
 
-from backend.exceptions import UserVisibleException
+from backend.exceptions import UserVisibleError
 from backend.statistics.plots.average_heartrate_by_average_speed import plot
 from tests.factories.activity_factories import ActivityFactory
 
@@ -10,7 +10,7 @@ def test_average_heartrate_by_average_speed_plot(some_basic_runs_and_rides) -> N
 
 
 def test_no_data(no_activities_at_all) -> None:
-    with pytest.raises(UserVisibleException):
+    with pytest.raises(UserVisibleError):
         plot(no_activities_at_all)
 
 

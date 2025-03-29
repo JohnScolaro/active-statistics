@@ -22,7 +22,7 @@ When debugging and testing the application locally, you need to run a next.js ap
 2. Enter the frontend folder with `cd frontend`.
 3. Install dependencies with `npm install`.
 4. Run with `npm run dev`.
-5. (Optional) If running with dev is slow, you can run `npm run build` and then serve the built static frontend with `npx serve@latest out`. Since this won't reload frontend changes, this is best for working on the backend.
+5. (Optional) If running with dev is slow, you can run `npm run builddev` and then serve the built static frontend with `npx serve@latest out`. Since this won't reload frontend changes, this is best for working on the backend.
 6. At this point, the frontend should be available on http://localhost:3000, and if the backend is also running, you should have the full application running on your computer.
 
 ## Deployment Infra

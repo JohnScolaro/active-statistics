@@ -1,2 +1,2 @@
-class UserVisibleException(Exception):
+class UserVisibleError(Exception):
     pass

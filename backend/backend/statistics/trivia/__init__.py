@@ -1,1 +1,2 @@
-from .trivia import TriviaProcessor, TriviaTidbitBase
+from .trivia import TriviaProcessor as TriviaProcessor
+from .trivia import TriviaTidbitBase as TriviaTidbitBase

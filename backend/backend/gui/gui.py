@@ -62,7 +62,8 @@ tab_tree: list[Tab | TabGroup] = [
 
 def get_all_tabs() -> list[Tab]:
     """
-    Return a flattened list of all the tabs in the tab tree. Just the actual tabs, not the TabGroups.
+    Return a flattened list of all the tabs in the tab tree. Just the actual tabs, not
+    the TabGroups.
     """
 
     def flatten(tabs: list[Tab | TabGroup]) -> list[Tab]:

@@ -31,7 +31,8 @@ class MinAttributeTidbit(TriviaTidbitBase):
         if activity.type.root != self.activity_type:
             return
 
-        # If the distance is non-zero and non-null, then turn off the "all distances null" flag.
+        # If the distance is non-zero and non-null, then turn off the "all distances
+        # null" flag.
         if attr_value is not None:
             if attr_value != 0.0:
                 self.all_distances_zero = False
@@ -41,7 +42,8 @@ class MinAttributeTidbit(TriviaTidbitBase):
             self.min_activity_id = activity.id
 
     def get_description(self) -> str:
-        return f"{self.activity_type} with Minimum {self.attribute_name.replace('_', ' ').title()}"
+        attr_name = self.attribute_name.replace("_", " ").title()
+        return f"{self.activity_type} with Minimum {attr_name}"
 
     def get_tidbit(self) -> Optional[str]:
         # If all the values have been zero, then chances are this is an
@@ -98,7 +100,8 @@ class MaxAttributeTidbit(TriviaTidbitBase):
             self.max_activity_id = activity.id
 
     def get_description(self) -> str:
-        return f"{self.activity_type} with Maximum {self.attribute_name.replace('_', ' ').title()}"
+        attr_name = self.attribute_name.replace("_", " ").title()
+        return f"{self.activity_type} with Maximum {attr_name}"
 
     def get_tidbit(self) -> Optional[str]:
         # If all the values have been zero, then chances are this is an
