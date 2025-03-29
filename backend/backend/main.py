@@ -316,7 +316,7 @@ async def download_data_route(
             download_status_table,
             get_athlete_id_from_session_token(user_table, session_token),
             dt.datetime.now(dt.timezone.utc),
-            "There was an error while trying to download your data. Please try again later.",
+            "There was an error while trying to download your data. Please try again later.",  # noqa: E501
             error=True,
             complete=True,
         )

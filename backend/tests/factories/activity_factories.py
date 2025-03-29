@@ -32,7 +32,7 @@ class ActivityFactory(factory.Factory):
     elev_high = FuzzyFloat(100, 200)
     elev_low = FuzzyFloat(0, 100)
     end_latlng = LazyAttribute(
-        lambda _: tuple([float(fake.latitude()), float(fake.longitude())])
+        lambda _: (float(fake.latitude()), float(fake.longitude()))
     )
     external_id = LazyAttribute(lambda _: str(FuzzyInteger(1, 999_999)))
     flagged = FuzzyChoice([True, False])
@@ -60,7 +60,7 @@ class ActivityFactory(factory.Factory):
         dt.datetime(2020, 1, 1, tzinfo=dt.timezone.utc),
     )
     start_latlng = LazyAttribute(
-        lambda _: tuple([float(fake.latitude()), float(fake.longitude())])
+        lambda _: (float(fake.latitude()), float(fake.longitude()))
     )
     timezone = None
     total_elevation_gain = FuzzyFloat(0, 2000)

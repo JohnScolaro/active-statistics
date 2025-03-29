@@ -6,7 +6,7 @@ import os
 from typing import Iterable
 
 import polyline as pl
-from PIL import Image as img
+from PIL import Image as Img
 from PIL import ImageDraw
 from PIL.Image import Image
 from stravalib.model import DetailedActivity
@@ -29,13 +29,11 @@ def create_images(activity_iterator: Iterable[DetailedActivity], path: str) -> N
     ]
     compact_activities.sort(key=lambda x: x.start_date_local)
 
-    activity_types = set(
-        compact_activity.type for compact_activity in compact_activities
-    )
+    activity_types = {compact_activity.type for compact_activity in compact_activities}
 
-    PROPOSED_IMAGE_SIZE = 1200
-    BORDER_SIZE_PX = 6
-    LINE_THICKNESS = 1
+    proposed_image_size = 1200
+    border_size_px = 6
+    line_thickness = 1
 
     for activity_type in activity_types:
         image = create_image(
@@ -45,9 +43,9 @@ def create_images(activity_iterator: Iterable[DetailedActivity], path: str) -> N
                 if activity.type == activity_type
             ),
             1.0,
-            PROPOSED_IMAGE_SIZE,
-            BORDER_SIZE_PX,
-            LINE_THICKNESS,
+            proposed_image_size,
+            border_size_px,
+            line_thickness,
         )
 
         if image is None:
@@ -70,9 +68,9 @@ def create_images(activity_iterator: Iterable[DetailedActivity], path: str) -> N
             ],
             gif_duration_ms,
             gif_fps,
-            PROPOSED_IMAGE_SIZE,
-            BORDER_SIZE_PX,
-            LINE_THICKNESS,
+            proposed_image_size,
+            border_size_px,
+            line_thickness,
         )
         gif_name = f"{activity_type}_grid_animation.gif"
         gif_path = os.path.join(path, gif_name)
@@ -120,10 +118,10 @@ def create_image(
         polyline: Polyline = pl.decode(encoded_polyline)
 
         if len(polyline) <= 1:
-            # I think we have ran into instances where people have ONLY activities with a single
-            # lat-long pair here, which means that the max cheby distance is 0, and then we do a
-            # divide by zero. So lets just continue if there is a single point, because lets be
-            # real, a single point is silly to plot.
+            # I think we have ran into instances where people have ONLY activities with
+            # a single lat-long pair here, which means that the max cheby distance is 0,
+            # and then we do a divide by zero. So lets just continue if there is a
+            # single point, because lets be real, a single point is silly to plot.
             continue
 
         polyline = apply_equirectangular_approximation(polyline)
@@ -150,7 +148,7 @@ def create_image(
 
     # Create a white canvas
     width, height = image_size, image_size
-    image = img.new("RGB", (width, height), "white")
+    image = Img.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
 
     for i, polyline in enumerate(polylines):
@@ -179,10 +177,10 @@ def create_image(
 
 def apply_equirectangular_approximation(polyline: Polyline) -> Polyline:
     def equirectangular_approximation(lat, lon, reference_lat):
-        R = 6371  # Radius of the Earth in kilometers
+        r = 6371  # Radius of the Earth in kilometers
 
-        x = R * lon * math.pi / 180 * math.cos(math.radians(reference_lat))
-        y = R * lat * math.pi / 180
+        x = r * lon * math.pi / 180 * math.cos(math.radians(reference_lat))
+        y = r * lat * math.pi / 180
 
         return x, y
 

@@ -29,7 +29,8 @@ def test_min_and_max_elevation_trivia(some_basic_runs_and_rides) -> None:
 class TestMinAttributeTidbit:
     def test_activity_types_with_only_zero_for_distances_are_filtered_out(self) -> None:
         """
-        Tests to make sure that if all activities return a distance of zero, that trivia data isn't returned.
+        Tests to make sure that if all activities return a distance of zero, that trivia
+        data isn't returned.
         """
         processor = TriviaProcessor()
         processor.register_tidbit(
@@ -69,7 +70,8 @@ class TestMinAttributeTidbit:
 class TestMaxAttributeTidbit:
     def test_activity_types_with_only_zero_for_distances_are_filtered_out(self) -> None:
         """
-        Tests to make sure that if all activities return a distance of zero, that trivia data isn't returned.
+        Tests to make sure that if all activities return a distance of zero, that trivia
+        data isn't returned.
         """
 
         processor = TriviaProcessor()

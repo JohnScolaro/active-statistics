@@ -1,6 +1,6 @@
 """
-A line plot of the pace you've ran over consecutive runs, along with moving averages. An attempt to convince yourself
-that you're getting faster.
+A line plot of the pace you've ran over consecutive runs, along with moving averages.
+An attempt to convince yourself that you're getting faster.
 
 TODO: Marker color proportional to length of activity.
 """
@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 from stravalib import unit_helper as uh
 from stravalib.model import ActivityType, DetailedActivity
 
-from backend.exceptions import UserVisibleException
+from backend.exceptions import UserVisibleError
 from backend.statistics.utils.average_speed_utils import get_y_axis_settings
 
 
@@ -33,11 +33,9 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
     )
 
     if not activities:
-        raise UserVisibleException("No data, so can't generate this plot.")
+        raise UserVisibleError("No data, so can't generate this plot.")
 
-    alphabetical_activity_types = sorted(
-        list(set(activity.type for activity in activities))
-    )
+    alphabetical_activity_types = sorted({activity.type for activity in activities})
 
     ordered_activities: dict[ActivityType, list[CompactActivity]] = {}
     for activity_type in alphabetical_activity_types:
@@ -74,10 +72,10 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
                 "y": 1.04,
                 "yanchor": "middle",
                 "buttons": [
-                    dict(
-                        label=activity_type,
-                        method="update",
-                        args=[
+                    {
+                        "label": activity_type,
+                        "method": "update",
+                        "args": [
                             {
                                 "visible": get_list_of_falses_with_one_true(
                                     len(data_scatters), i
@@ -95,7 +93,7 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
                                 }
                             },
                         ],
-                    )
+                    }
                     for i, (activity_type, scatter) in enumerate(data_scatters)
                 ],
             },
@@ -204,8 +202,9 @@ def generate_weighted_moving_average(
             (group["values"] * group["weights"]).sum() / group["weights"].sum()
         )
 
-    # Keep only 1 contiguous "None" row. A single "None" row is enough to stop plotly from joining the moving averages
-    # together over long gaps, we don't want to create extra data for nothing, so drop the multiples.
+    # Keep only 1 contiguous "None" row. A single "None" row is enough to stop plotly
+    # from joining the moving averages together over long gaps, we don't want to create
+    # extra data for nothing, so drop the multiples.
     final_dates: list[dt.datetime] = []
     final_values: list[float] = []
     for date, value in zip(dates, values):
@@ -240,7 +239,8 @@ def get_list_of_compact_activities(
     activity_iterator: Iterator[DetailedActivity],
 ) -> list[CompactActivity]:
     """
-    To save data, we don't want to load everything from every detailed activity. Just the information we need.
+    To save data, we don't want to load everything from every detailed activity. Just
+    the information we need.
     """
     compact_activities: list[CompactActivity] = []
     for activity in activity_iterator:
@@ -248,11 +248,13 @@ def get_list_of_compact_activities(
         if activity.flagged:
             continue
 
-        # We also can't generate this plot for activities were the start date or the average speed are None.
+        # We also can't generate this plot for activities were the start date or the
+        # average speed are None.
         if activity.start_date_local is None or activity.average_speed is None:
             continue
 
-        # We also can't generated weighted average lines if we're missing the moving time.
+        # We also can't generated weighted average lines if we're missing the moving
+        # time.
         if activity.moving_time is None:
             continue
 
@@ -270,8 +272,9 @@ def get_list_of_compact_activities(
 
 def set_initial_y_axis(fig: go.Figure) -> None:
     """
-    If the y axis format is set to something incorrect (for example "%M:%S" when the data is actually numeric) then
-    plotly defaults to displaying the y axis as a percentage. This sets the initial yaxis format to be correct.
+    If the y axis format is set to something incorrect (for example "%M:%S" when the
+    data is actually numeric) then plotly defaults to displaying the y axis as a
+    percentage. This sets the initial yaxis format to be correct.
     """
     first_activity_type = fig["data"][0]["name"]
 

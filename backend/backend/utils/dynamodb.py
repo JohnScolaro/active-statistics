@@ -93,7 +93,7 @@ def save_download_status_to_dynamo(
 ) -> None:
     try:
         # Use the attributes from the Pydantic model
-        response = download_status_table.update_item(
+        _ = download_status_table.update_item(
             Key={"athlete_id": athlete_id},
             UpdateExpression=(
                 "SET last_download_time = :last_download_time, "

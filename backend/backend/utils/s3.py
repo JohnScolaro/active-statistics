@@ -57,9 +57,9 @@ def delete_athlete_data(s3_client: S3Client, athlete_id: int) -> None:
     """
     try:
         # Attempt to delete the object corresponding to the athlete_id
-        response = s3_client.delete_object(Bucket=BUCKET_NAME, Key=str(athlete_id))
+        _ = s3_client.delete_object(Bucket=BUCKET_NAME, Key=str(athlete_id))
+        # response = s3_client.delete_object(Bucket=BUCKET_NAME, Key=str(athlete_id))
         # You can check the response if needed
-        # print(response)  # For debugging purposes
     except ClientError as e:
         # Handle any errors that occur during the delete operation
         print(f"Error deleting data for athlete {athlete_id}: {e}")

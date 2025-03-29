@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from stravalib import unit_helper as uh
 from stravalib.model import ActivityType, DetailedActivity
 
-from backend.exceptions import UserVisibleException
+from backend.exceptions import UserVisibleError
 from backend.statistics.utils.average_speed_utils import (
     average_speed_to_kmph,
     average_speed_to_mins_per_km,
@@ -42,8 +42,11 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
     ]
 
     if not runs and not rides:
-        raise UserVisibleException(
-            "There are no runs and no rides with heartrate, so this plot can not be generated."
+        raise UserVisibleError(
+            (
+                "There are no runs and no rides with heartrate, so this plot can not "
+                "be generated."
+            )
         )
 
     scatters = []
@@ -139,15 +142,15 @@ def get_scatter_plot(
     # Scale by an arbitrary number to make this look better.
     scaled_distances_for_size = [d * 20 for d in distances_in_km]
 
-    tickvals = [
-        i
-        for i in range(
+    tickvals = list(
+        range(
             min(start_timestamps),
             max(start_timestamps),
-            # The outter max is stopping this from going below 1, which can happen in cases of very few activities.
+            # The outter max is stopping this from going below 1, which can
+            # happen in cases of very few activities.
             max(1, (max(start_timestamps) - min(start_timestamps)) // 5),
         )
-    ]
+    )
     ticktext = [dt.datetime.fromtimestamp(i).strftime("%d/%m/%Y") for i in tickvals]
 
     return go.Scatter(
@@ -155,18 +158,18 @@ def get_scatter_plot(
         y=average_paces,
         customdata=list(zip(distances_in_km, start_times)),
         mode="markers",
-        marker=dict(
-            size=scaled_distances_for_size,
-            color=start_timestamps,
-            showscale=True,  # Shows the colorbar
-            sizemode="area",
-            colorbar=dict(
-                title="Date of Activity",
-                tickmode="array",
-                ticktext=ticktext,
-                tickvals=tickvals,
-            ),
-        ),
+        marker={
+            "size": scaled_distances_for_size,
+            "color": start_timestamps,
+            "showscale": True,  # Shows the colorbar
+            "sizemode": "area",
+            "colorbar": {
+                "title": "Date of Activity",
+                "tickmode": "array",
+                "ticktext": ticktext,
+                "tickvals": tickvals,
+            },
+        },
         hovertemplate="Average Heartrate: %{x} bpm<br>"
         + get_hovertemplate_pace_formatting(activity_type)
         + "Distance: %{customdata[0]:.2f}km<br>"
@@ -196,10 +199,10 @@ def get_buttons(runs: bool, rides: bool) -> list[Any]:
     buttons: list[dict[str, Any]] = []
     if runs:
         buttons.append(
-            dict(
-                label="Run",
-                method="update",
-                args=[
+            {
+                "label": "Run",
+                "method": "update",
+                "args": [
                     {"visible": [False] * num_activities_to_make_buttons_for},
                     {
                         "yaxis": {
@@ -208,15 +211,15 @@ def get_buttons(runs: bool, rides: bool) -> list[Any]:
                         }
                     },
                 ],
-            ),
+            },
         )
 
     if rides:
         buttons.append(
-            dict(
-                label="Ride",
-                method="update",
-                args=[
+            {
+                "label": "Ride",
+                "method": "update",
+                "args": [
                     {"visible": [False] * num_activities_to_make_buttons_for},
                     {
                         "yaxis": {
@@ -225,7 +228,7 @@ def get_buttons(runs: bool, rides: bool) -> list[Any]:
                         }
                     },
                 ],
-            ),
+            },
         )
 
     for i, button in enumerate(buttons):

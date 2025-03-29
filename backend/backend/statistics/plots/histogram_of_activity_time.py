@@ -5,7 +5,7 @@ from typing import Iterator
 import plotly.graph_objects as go
 from stravalib.model import ActivityType, DetailedActivity
 
-from backend.exceptions import UserVisibleException
+from backend.exceptions import UserVisibleError
 
 
 @dataclasses.dataclass
@@ -20,10 +20,10 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
     )
 
     if not compact_activities:
-        raise UserVisibleException("No Data")
+        raise UserVisibleError("No Data")
 
     activity_types = sorted(
-        set(activity.type for activity in compact_activities), reverse=True
+        {activity.type for activity in compact_activities}, reverse=True
     )
 
     histograms: list[go.Histogram] = []
@@ -45,14 +45,14 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
 
     return go.Figure(
         data=histograms,
-        layout=dict(
-            xaxis_title="Time of Day",
-            yaxis_title="Frequency",
-            title="Histogram of Activity Start Times",
-            barmode="stack",
-            xaxis={"tickformat": "%H:%M"},
-            title_x=0.5,
-        ),
+        layout={
+            "xaxis_title": "Time of Day",
+            "yaxis_title": "Frequency",
+            "title": "Histogram of Activity Start Times",
+            "barmode": "stack",
+            "xaxis": {"tickformat": "%H:%M"},
+            "title_x": 0.5,
+        },
     )
 
 

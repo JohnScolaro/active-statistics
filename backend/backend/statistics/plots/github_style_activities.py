@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from plotly_calplot import calplot
 from stravalib.model import DetailedActivity
 
-from backend.exceptions import UserVisibleException
+from backend.exceptions import UserVisibleError
 
 CMAP = "YlGn"
 
@@ -16,7 +16,7 @@ def plot(activity_iterator: Iterator[DetailedActivity]) -> go.Figure:
     activity_dates = [activity.start_date_local for activity in activity_iterator]
 
     if not activity_dates:
-        raise UserVisibleException(
+        raise UserVisibleError(
             "Can't find any activities, so can't generate this plot."
         )
 

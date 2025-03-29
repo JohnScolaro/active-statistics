@@ -24,10 +24,12 @@ def average_speed_to_mins_per_km(
     average_speed_in_m_per_sec: uh._Quantity,
 ) -> Optional[dt.datetime]:
     """
-    Plotly doesn't support timedelta on the y-axis, so we show datetimes, and just change the plot formatting to make
+    Plotly doesn't support timedelta on the y-axis, so we show datetimes, and just
+    change the plot formatting to make
     it look correct.
     """
-    # If the speed is 0, then the mins/km would be infinity and ruin the plot, so just return None in this case.
+    # If the speed is 0, then the mins/km would be infinity and ruin the plot, so just
+    # return None in this case.
     if average_speed_in_m_per_sec == 0:
         return None
 
