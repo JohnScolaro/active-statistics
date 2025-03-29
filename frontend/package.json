@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "cp .env.loc .env.local && next dev --turbopack",
+    "builddev": "cp .env.loc .env.local && next build",
     "build": "cp .env.prod .env.local && next build",
     "start": "cp .env.loc .env.local && next start",
     "lint": "cp .env.loc .env.local && next lint"
