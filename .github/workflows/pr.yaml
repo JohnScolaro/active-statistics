@@ -36,4 +36,5 @@ jobs:
           set -a
           source ./backend/.example.env
           set +a
+          export AWS_DEFAULT_REGION=ap-southeast-2
           pytest ./backend
