@@ -34,6 +34,6 @@ jobs:
       - name: Run tests
         run: |
           set -a
-          source ./backend/envs/example.env
+          source ./backend/.example.env
           set +a
           pytest ./backend
